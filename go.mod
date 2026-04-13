@@ -37,4 +37,4 @@ require (
 	golang.org/x/tools v0.42.0 // indirect
 )
 
-replace duq-tracing => ../jarvis-tracing/go
+replace duq-tracing => ../duq-tracing/go
