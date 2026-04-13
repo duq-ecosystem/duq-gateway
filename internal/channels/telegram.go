@@ -24,7 +24,7 @@ type TelegramChannel struct {
 }
 
 // NewTelegramChannel creates a new Telegram channel
-// Note: TTS is done by Jarvis, no local TTS config needed
+// Note: TTS is done by Duq, no local TTS config needed
 func NewTelegramChannel(botToken string) *TelegramChannel {
 	return &TelegramChannel{
 		config: TelegramConfig{
@@ -42,7 +42,7 @@ func (c *TelegramChannel) CanHandle(ctx *ResponseContext) bool {
 }
 
 func (c *TelegramChannel) Send(ctx *ResponseContext) error {
-	// Check voice-aware fields from Jarvis
+	// Check voice-aware fields from Duq
 	shouldVoice := ctx.IsVoice ||
 		ctx.OutputType == "voice" ||
 		ctx.OutputType == "both"
@@ -54,19 +54,19 @@ func (c *TelegramChannel) Send(ctx *ResponseContext) error {
 }
 
 func (c *TelegramChannel) sendVoiceResponse(ctx *ResponseContext) error {
-	// TTS is done by Jarvis - we only handle pre-synthesized audio
+	// TTS is done by Duq - we only handle pre-synthesized audio
 	if len(ctx.VoiceData) > 0 {
-		log.Printf("[telegram] Using pre-synthesized audio from Jarvis (%d bytes, format=%s)",
+		log.Printf("[telegram] Using pre-synthesized audio from Duq (%d bytes, format=%s)",
 			len(ctx.VoiceData), ctx.VoiceFormat)
 		return c.sendVoiceFromData(ctx)
 	}
 
-	// No voice data from Jarvis - fallback to text
-	log.Printf("[telegram] No voice data from Jarvis, falling back to text")
+	// No voice data from Duq - fallback to text
+	log.Printf("[telegram] No voice data from Duq, falling back to text")
 	return c.sendTextMessage(ctx.ChatID, ctx.Response)
 }
 
-// sendVoiceFromData sends pre-synthesized audio from Jarvis
+// sendVoiceFromData sends pre-synthesized audio from Duq
 // If format is OGG - sends directly, otherwise converts MP3 to OGG Opus
 func (c *TelegramChannel) sendVoiceFromData(ctx *ResponseContext) error {
 	const maxCaptionLen = 1024
@@ -77,7 +77,7 @@ func (c *TelegramChannel) sendVoiceFromData(ctx *ResponseContext) error {
 		caption = ctx.Response
 	}
 
-	// If already OGG format (from Jarvis TTS), send directly without conversion
+	// If already OGG format (from Duq TTS), send directly without conversion
 	if ctx.VoiceFormat == "ogg" {
 		log.Printf("[telegram] Voice already in OGG format, sending directly")
 		return c.sendOggVoice(ctx.ChatID, ctx.VoiceData, caption)
@@ -87,7 +87,7 @@ func (c *TelegramChannel) sendVoiceFromData(ctx *ResponseContext) error {
 	log.Printf("[telegram] Converting MP3 to OGG (format=%s)", ctx.VoiceFormat)
 
 	// Save MP3 to temp file
-	tmpMP3, err := os.CreateTemp("", "jarvis_tts_*.mp3")
+	tmpMP3, err := os.CreateTemp("", "duq_tts_*.mp3")
 	if err != nil {
 		return fmt.Errorf("failed to create temp mp3: %w", err)
 	}

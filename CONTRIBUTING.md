@@ -1,4 +1,4 @@
-# Contributing to Jarvis Gateway
+# Contributing to Duq Gateway
 
 Thank you for your interest in contributing! This document provides guidelines for contributing to this project.
 
@@ -43,10 +43,10 @@ golangci-lint run
 
 ```bash
 # Build
-go build -o jarvis-gateway .
+go build -o duq-gateway .
 
 # Verify binary works
-./jarvis-gateway --help
+./duq-gateway --help
 ```
 
 ### 5. Commit Your Changes

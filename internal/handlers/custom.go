@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/jarvis"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/duq"
 )
 
 type CustomWebhook struct {
@@ -15,7 +15,7 @@ type CustomWebhook struct {
 }
 
 func Custom(cfg *config.Config) http.HandlerFunc {
-	client := jarvis.NewClient(cfg)
+	client := duq.NewClient(cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		var webhook CustomWebhook

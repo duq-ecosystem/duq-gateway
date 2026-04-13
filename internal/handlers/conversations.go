@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"jarvis-gateway/internal/session"
+	"duq-gateway/internal/session"
 )
 
 // ConversationResponse represents a conversation in API responses

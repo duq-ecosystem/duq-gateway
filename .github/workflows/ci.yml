@@ -14,9 +14,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: jarvis
-          POSTGRES_PASSWORD: jarvis
-          POSTGRES_DB: jarvis_test
+          POSTGRES_USER: duq
+          POSTGRES_PASSWORD: duq
+          POSTGRES_DB: duq_test
         ports:
           - 5432:5432
         options: >-
@@ -51,11 +51,11 @@ jobs:
 
       - name: Run tests with coverage
         env:
-          JARVIS_DB_HOST: localhost
-          JARVIS_DB_PORT: 5432
-          JARVIS_DB_USER: jarvis
-          JARVIS_DB_PASSWORD: jarvis
-          JARVIS_DB_NAME: jarvis_test
+          DUQ_DB_HOST: localhost
+          DUQ_DB_PORT: 5432
+          DUQ_DB_USER: duq
+          DUQ_DB_PASSWORD: duq
+          DUQ_DB_NAME: duq_test
           REDIS_URL: redis://localhost:6379
         run: |
           go test ./... -v -race -coverprofile=coverage.out -covermode=atomic
@@ -80,10 +80,10 @@ jobs:
 
       - name: Build binary
         run: |
-          GOOS=linux GOARCH=amd64 go build -o jarvis-gateway-linux .
+          GOOS=linux GOARCH=amd64 go build -o duq-gateway-linux .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: jarvis-gateway-linux
-          path: jarvis-gateway-linux
+          name: duq-gateway-linux
+          path: duq-gateway-linux

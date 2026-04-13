@@ -22,7 +22,7 @@ func NewBuilder() *RouterBuilder {
 }
 
 // WithTelegram adds telegram channel (usually first, used as fallback)
-// Note: TTS is done by Jarvis, no local TTS config needed
+// Note: TTS is done by Duq, no local TTS config needed
 func (b *RouterBuilder) WithTelegram(botToken string) *RouterBuilder {
 	b.telegram = NewTelegramChannel(botToken)
 	b.channels = append(b.channels, b.telegram)

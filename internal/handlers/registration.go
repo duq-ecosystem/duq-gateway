@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/db"
-	"jarvis-gateway/internal/registration"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/db"
+	"duq-gateway/internal/registration"
 )
 
 // RegistrationDeps contains dependencies for registration handlers

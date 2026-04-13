@@ -60,7 +60,7 @@ func DefaultCSRFConfig() CSRFConfig {
 			"/api/calendar",
 			"/api/gmail",
 			"/api/custom",
-			"/api/jarvis/callback",
+			"/api/duq/callback",
 		},
 		ExcludePrefixes: []string{
 			"/api/auth/keycloak/",      // OAuth callbacks

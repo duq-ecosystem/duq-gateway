@@ -44,8 +44,8 @@ type GoogleOAuthConfig struct {
 
 type KeycloakConfig struct {
 	URL          string `json:"url"`           // e.g., http://localhost:8180
-	Realm        string `json:"realm"`         // e.g., jarvis
-	ClientID     string `json:"client_id"`     // e.g., jarvis-gateway
+	Realm        string `json:"realm"`         // e.g., duq
+	ClientID     string `json:"client_id"`     // e.g., duq-gateway
 	ClientSecret string `json:"client_secret"` // from Keycloak
 	Enabled      bool   `json:"enabled"`       // Enable Keycloak auth
 }
@@ -57,7 +57,7 @@ type TLSConfig struct {
 	// CertMagic (Let's Encrypt) settings
 	Domain  string `json:"domain"`   // Domain for auto-cert (e.g., on-za-menya.online)
 	Email   string `json:"email"`    // Email for Let's Encrypt notifications
-	DataDir string `json:"data_dir"` // Directory to store certificates (default: /var/lib/jarvis-gateway/certs)
+	DataDir string `json:"data_dir"` // Directory to store certificates (default: /var/lib/duq-gateway/certs)
 }
 
 type TracingConfig struct {
@@ -74,7 +74,7 @@ type QueueConfig struct {
 type TimeoutsConfig struct {
 	// HTTP client timeouts
 	ProxyTimeout   int `json:"proxy_timeout"`   // Proxy handler timeout (default: 60s)
-	JarvisTimeout  int `json:"jarvis_timeout"`  // Jarvis API client timeout (default: 120s)
+	DuqTimeout  int `json:"duq_timeout"`  // Duq API client timeout (default: 120s)
 	QueueTimeout   int `json:"queue_timeout"`   // Redis queue timeout (default: 10s)
 	KeycloakTimeout int `json:"keycloak_timeout"` // Keycloak HTTP client timeout (default: 10s)
 	RedisTimeout   int `json:"redis_timeout"`   // Redis operation timeout in seconds (default: 5)
@@ -98,7 +98,7 @@ type UserDefaultsConfig struct {
 type Config struct {
 	Port               string            `json:"port"`
 	TelegramChatID     string            `json:"telegram_chat_id"`
-	JarvisURL          string            `json:"jarvis_url"`
+	DuqURL          string            `json:"duq_url"`
 	GatewayHost        string            `json:"gateway_host"`         // Phase 3: Self address for callbacks
 	UseAsyncQueue      bool              `json:"use_async_queue"`      // Phase 3: Use async queue instead of sync chat
 	KeycloakInternalURL string           `json:"keycloak_internal_url"` // Internal Keycloak URL for proxy (default: http://localhost:8180)
@@ -123,14 +123,14 @@ func Load() (*Config, error) {
 	cfg := &Config{
 		Port:           "8082",
 		TelegramChatID: "764733417",
-		JarvisURL:      "http://localhost:8081",
+		DuqURL:      "http://localhost:8081",
 		GatewayHost:    "localhost:8082", // Phase 3: Default to localhost
 		UseAsyncQueue:  true,             // Phase 3: Default to async (new behavior)
 		Database: DatabaseConfig{
 			Host: "localhost",
 			Port: 5433,
-			User: "jarvis",
-			Name: "jarvis",
+			User: "duq",
+			Name: "duq",
 		},
 		Voice: VoiceConfig{
 			STTCommand:     "/usr/local/bin/whisper-stt",
@@ -140,14 +140,14 @@ func Load() (*Config, error) {
 		Tracing: TracingConfig{
 			Enabled:  true,
 			RedisURL: "redis://localhost:6379",
-			Channel:  "jarvis:traces",
+			Channel:  "duq:traces",
 		},
 		Queue: QueueConfig{
 			RedisURL: "redis://localhost:6379",
 		},
 		Timeouts: TimeoutsConfig{
 			ProxyTimeout:      60,   // 60 seconds
-			JarvisTimeout:     120,  // 120 seconds
+			DuqTimeout:     120,  // 120 seconds
 			QueueTimeout:      10,   // 10 seconds
 			KeycloakTimeout:   10,   // 10 seconds
 			RedisTimeout:      5,    // 5 seconds
@@ -165,8 +165,8 @@ func Load() (*Config, error) {
 
 	// Try to load from config file
 	configPaths := []string{
-		"/etc/jarvis-gateway/config.json",
-		filepath.Join(os.Getenv("HOME"), ".config/jarvis-gateway/config.json"),
+		"/etc/duq-gateway/config.json",
+		filepath.Join(os.Getenv("HOME"), ".config/duq-gateway/config.json"),
 		"config.json",
 	}
 
@@ -187,7 +187,7 @@ func Load() (*Config, error) {
 		cfg.TelegramChatID = chatID
 	}
 	if url := os.Getenv("JARVIS_URL"); url != "" {
-		cfg.JarvisURL = url
+		cfg.DuqURL = url
 	}
 
 	// Phase 3: Gateway host for callbacks

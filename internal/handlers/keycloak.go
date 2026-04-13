@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/db"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/db"
 )
 
 // keycloakHTTPClient is a shared HTTP client for Keycloak requests

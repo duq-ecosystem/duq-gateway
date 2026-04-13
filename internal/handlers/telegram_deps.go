@@ -1,13 +1,13 @@
 package handlers
 
 import (
-	"jarvis-gateway/internal/channels"
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/credentials"
-	"jarvis-gateway/internal/db"
-	"jarvis-gateway/internal/queue"
-	"jarvis-gateway/internal/registration"
-	"jarvis-gateway/internal/session"
+	"duq-gateway/internal/channels"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/credentials"
+	"duq-gateway/internal/db"
+	"duq-gateway/internal/queue"
+	"duq-gateway/internal/registration"
+	"duq-gateway/internal/session"
 )
 
 // TelegramDeps contains dependencies for the Telegram handler

@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/credentials"
-	"jarvis-gateway/internal/queue"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/credentials"
+	"duq-gateway/internal/queue"
 )
 
 // refreshGoogleTokenIfNeeded checks if token is expired and refreshes it
@@ -178,9 +178,9 @@ func TelegramWithDeps(deps *TelegramDeps) http.HandlerFunc {
 			}
 		}
 
-		// NOTE: Conversation history is now managed by Jarvis backend.
+		// NOTE: Conversation history is now managed by Duq backend.
 		// Gateway is pass-through — no session management here.
-		// Jarvis loads history from DB and saves messages automatically.
+		// Duq loads history from DB and saves messages automatically.
 
 		// Get user preferences from database
 		if deps.DBClient != nil {
@@ -214,16 +214,16 @@ func TelegramWithDeps(deps *TelegramDeps) http.HandlerFunc {
 			}
 		}
 
-		// Push directly to Redis queue - Jarvis worker will pick it up
-		callbackURL := fmt.Sprintf("http://%s/api/jarvis/callback", deps.Config.GatewayHost)
+		// Push directly to Redis queue - Duq worker will pick it up
+		callbackURL := fmt.Sprintf("http://%s/api/duq/callback", deps.Config.GatewayHost)
 
 		inputType := "text"
 		if isVoice {
 			inputType = "voice"
 		}
 
-		// NOTE: History is no longer sent to Jarvis.
-		// Jarvis manages conversation history in its own database.
+		// NOTE: History is no longer sent to Duq.
+		// Duq manages conversation history in its own database.
 
 		// Build user preferences for payload
 		var userPrefs map[string]string
@@ -239,12 +239,12 @@ func TelegramWithDeps(deps *TelegramDeps) http.HandlerFunc {
 			Type:        "message",
 			Priority:    50,
 			CallbackURL: callbackURL,
-			// NOTE: ConversationID is managed by Jarvis, not Gateway
+			// NOTE: ConversationID is managed by Duq, not Gateway
 			Payload: map[string]interface{}{
 				"message":          text,
 				"output_channel":   "telegram",
 				"allowed_tools":    opts.AllowedTools,
-				// NOTE: History removed — Jarvis loads from DB
+				// NOTE: History removed — Duq loads from DB
 				"user_preferences": userPrefs,
 				"gws_credentials":  opts.GWSCredentials,
 			},
@@ -269,7 +269,7 @@ func TelegramWithDeps(deps *TelegramDeps) http.HandlerFunc {
 }
 
 // TelegramSend creates a handler for sending Telegram messages
-// Used by jarvis scheduler for morning messages
+// Used by duq scheduler for morning messages
 func TelegramSend(cfg *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req TelegramSendRequest

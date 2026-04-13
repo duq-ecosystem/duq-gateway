@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"jarvis-gateway/internal/config"
+	"duq-gateway/internal/config"
 
 	_ "github.com/lib/pq"
 )

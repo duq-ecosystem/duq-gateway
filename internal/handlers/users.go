@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
-	"jarvis-gateway/internal/db"
+	"duq-gateway/internal/db"
 )
 
 type User struct {

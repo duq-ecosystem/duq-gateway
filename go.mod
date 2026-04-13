@@ -1,4 +1,4 @@
-module jarvis-gateway
+module duq-gateway
 
 go 1.25.7
 
@@ -11,7 +11,7 @@ require (
 	github.com/redis/go-redis/v9 v9.18.0
 	github.com/yuin/goldmark v1.8.2
 	golang.org/x/crypto v0.49.0
-	jarvis-tracing v0.0.0
+	duq-tracing v0.0.0
 )
 
 require (
@@ -37,4 +37,4 @@ require (
 	golang.org/x/tools v0.42.0 // indirect
 )
 
-replace jarvis-tracing => ../jarvis-tracing/go
+replace duq-tracing => ../jarvis-tracing/go

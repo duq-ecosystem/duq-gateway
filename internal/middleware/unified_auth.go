@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"jarvis-gateway/internal/db"
+	"duq-gateway/internal/db"
 )
 
 // UnifiedAuth middleware handles authentication for both mobile and telegram channels

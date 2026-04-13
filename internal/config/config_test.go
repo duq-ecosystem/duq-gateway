@@ -28,8 +28,8 @@ func TestLoadDefaults(t *testing.T) {
 	if cfg.TelegramChatID != "764733417" {
 		t.Errorf("TelegramChatID = %s, want 764733417", cfg.TelegramChatID)
 	}
-	if cfg.JarvisURL != "http://localhost:8081" {
-		t.Errorf("JarvisURL = %s, want http://localhost:8081", cfg.JarvisURL)
+	if cfg.DuqURL != "http://localhost:8081" {
+		t.Errorf("DuqURL = %s, want http://localhost:8081", cfg.DuqURL)
 	}
 	if cfg.GatewayHost != "localhost:8082" {
 		t.Errorf("GatewayHost = %s, want localhost:8082", cfg.GatewayHost)
@@ -52,11 +52,11 @@ func TestLoadDatabaseDefaults(t *testing.T) {
 	if cfg.Database.Port != 5433 {
 		t.Errorf("Database.Port = %d, want 5433", cfg.Database.Port)
 	}
-	if cfg.Database.User != "jarvis" {
-		t.Errorf("Database.User = %s, want jarvis", cfg.Database.User)
+	if cfg.Database.User != "duq" {
+		t.Errorf("Database.User = %s, want duq", cfg.Database.User)
 	}
-	if cfg.Database.Name != "jarvis" {
-		t.Errorf("Database.Name = %s, want jarvis", cfg.Database.Name)
+	if cfg.Database.Name != "duq" {
+		t.Errorf("Database.Name = %s, want duq", cfg.Database.Name)
 	}
 }
 
@@ -91,8 +91,8 @@ func TestLoadTracingDefaults(t *testing.T) {
 	if cfg.Tracing.RedisURL != "redis://localhost:6379" {
 		t.Errorf("Tracing.RedisURL = %s, want redis://localhost:6379", cfg.Tracing.RedisURL)
 	}
-	if cfg.Tracing.Channel != "jarvis:traces" {
-		t.Errorf("Tracing.Channel = %s, want jarvis:traces", cfg.Tracing.Channel)
+	if cfg.Tracing.Channel != "duq:traces" {
+		t.Errorf("Tracing.Channel = %s, want duq:traces", cfg.Tracing.Channel)
 	}
 }
 
@@ -114,8 +114,8 @@ func TestLoadEnvOverride(t *testing.T) {
 	if cfg.Port != "9999" {
 		t.Errorf("Port = %s, want 9999 (from env)", cfg.Port)
 	}
-	if cfg.JarvisURL != "http://custom:1234" {
-		t.Errorf("JarvisURL = %s, want http://custom:1234 (from env)", cfg.JarvisURL)
+	if cfg.DuqURL != "http://custom:1234" {
+		t.Errorf("DuqURL = %s, want http://custom:1234 (from env)", cfg.DuqURL)
 	}
 }
 
@@ -191,7 +191,7 @@ func TestLoadTLSEnvOverride(t *testing.T) {
 // TestLoadKeycloakEnvOverride tests Keycloak environment overrides
 func TestLoadKeycloakEnvOverride(t *testing.T) {
 	os.Setenv("KEYCLOAK_URL", "http://keycloak:8180")
-	os.Setenv("KEYCLOAK_REALM", "jarvis")
+	os.Setenv("KEYCLOAK_REALM", "duq")
 	os.Setenv("KEYCLOAK_CLIENT_ID", "gateway")
 	os.Setenv("KEYCLOAK_ENABLED", "1")
 	defer func() {
@@ -209,8 +209,8 @@ func TestLoadKeycloakEnvOverride(t *testing.T) {
 	if cfg.Keycloak.URL != "http://keycloak:8180" {
 		t.Errorf("Keycloak.URL = %s, want http://keycloak:8180", cfg.Keycloak.URL)
 	}
-	if cfg.Keycloak.Realm != "jarvis" {
-		t.Errorf("Keycloak.Realm = %s, want jarvis", cfg.Keycloak.Realm)
+	if cfg.Keycloak.Realm != "duq" {
+		t.Errorf("Keycloak.Realm = %s, want duq", cfg.Keycloak.Realm)
 	}
 	if cfg.Keycloak.ClientID != "gateway" {
 		t.Errorf("Keycloak.ClientID = %s, want gateway", cfg.Keycloak.ClientID)
@@ -262,7 +262,7 @@ func TestConfigStructFields(t *testing.T) {
 	// Test struct zero values exist
 	_ = cfg.Port
 	_ = cfg.TelegramChatID
-	_ = cfg.JarvisURL
+	_ = cfg.DuqURL
 	_ = cfg.GatewayHost
 	_ = cfg.UseAsyncQueue
 	_ = cfg.DocsPath
@@ -296,7 +296,7 @@ func TestTimeoutsConfigDefaults(t *testing.T) {
 		expected int
 	}{
 		{"ProxyTimeout", cfg.Timeouts.ProxyTimeout, 60},
-		{"JarvisTimeout", cfg.Timeouts.JarvisTimeout, 120},
+		{"DuqTimeout", cfg.Timeouts.DuqTimeout, 120},
 		{"QueueTimeout", cfg.Timeouts.QueueTimeout, 10},
 		{"KeycloakTimeout", cfg.Timeouts.KeycloakTimeout, 10},
 		{"RedisTimeout", cfg.Timeouts.RedisTimeout, 5},
@@ -464,7 +464,7 @@ func TestTimeoutsConfigStructFields(t *testing.T) {
 
 	// Verify all fields exist with correct zero values
 	_ = cfg.ProxyTimeout
-	_ = cfg.JarvisTimeout
+	_ = cfg.DuqTimeout
 	_ = cfg.QueueTimeout
 	_ = cfg.KeycloakTimeout
 	_ = cfg.RedisTimeout

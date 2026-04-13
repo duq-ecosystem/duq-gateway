@@ -1,10 +1,10 @@
 .PHONY: test build deploy clean run lint
 
 # Variables
-BINARY_NAME=jarvis-gateway
+BINARY_NAME=duq-gateway
 BINARY_LINUX=$(BINARY_NAME)-linux
 VPS_HOST=root@90.156.230.49
-VPS_PATH=/usr/local/bin/jarvis-gateway
+VPS_PATH=/usr/local/bin/duq-gateway
 
 # Default target
 all: test build
@@ -38,12 +38,12 @@ lint:
 
 # Deploy to VPS
 deploy: build-linux
-	ssh $(VPS_HOST) "systemctl stop jarvis-gateway || true"
+	ssh $(VPS_HOST) "systemctl stop duq-gateway || true"
 	scp $(BINARY_LINUX) $(VPS_HOST):$(VPS_PATH)
-	ssh $(VPS_HOST) "systemctl start jarvis-gateway"
+	ssh $(VPS_HOST) "systemctl start duq-gateway"
 	@echo "Deployed! Checking status..."
 	@sleep 2
-	ssh $(VPS_HOST) "systemctl status jarvis-gateway --no-pager | head -10"
+	ssh $(VPS_HOST) "systemctl status duq-gateway --no-pager | head -10"
 
 # Deploy and verify
 deploy-verify: deploy
@@ -51,11 +51,11 @@ deploy-verify: deploy
 
 # View logs on VPS
 logs:
-	ssh $(VPS_HOST) "journalctl -u jarvis-gateway -n 50 --no-pager"
+	ssh $(VPS_HOST) "journalctl -u duq-gateway -n 50 --no-pager"
 
 # View error logs on VPS
 logs-err:
-	ssh $(VPS_HOST) "journalctl -u jarvis-gateway -p err -n 30 --no-pager"
+	ssh $(VPS_HOST) "journalctl -u duq-gateway -p err -n 30 --no-pager"
 
 # Clean build artifacts
 clean:

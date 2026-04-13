@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/credentials"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/credentials"
 )
 
 // OAuthState holds pending OAuth states
@@ -158,7 +158,7 @@ func GoogleOAuthCallback(deps *GoogleOAuthDeps) http.HandlerFunc {
 		// Sync email to users table
 		if userEmail != "" {
 			_, err := deps.CredService.DB().Exec(
-				`UPDATE users SET email = $1 WHERE telegram_id = $2 AND (email IS NULL OR email = '' OR email LIKE '%@jarvis.local')`,
+				`UPDATE users SET email = $1 WHERE telegram_id = $2 AND (email IS NULL OR email = '' OR email LIKE '%@duq.local')`,
 				userEmail, oauthState.UserID,
 			)
 			if err != nil {
@@ -365,10 +365,10 @@ func GetOAuthLinkHandler(cfg *config.Config) http.HandlerFunc {
 
 // InitiateOAuthRequest is the request body for InitiateOAuthHandler
 type InitiateOAuthRequest struct {
-	UserID string `json:"user_id"` // Telegram user ID as string (from Jarvis)
+	UserID string `json:"user_id"` // Telegram user ID as string (from Duq)
 }
 
-// InitiateOAuthHandler handles OAuth initiation from Jarvis agent
+// InitiateOAuthHandler handles OAuth initiation from Duq agent
 // POST /api/oauth/google/initiate
 // Body: { "user_id": "764733417" }
 // Response: { "success": true, "message": "OAuth link sent to Telegram" }

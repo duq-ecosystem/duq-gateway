@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/credentials"
-	"jarvis-gateway/internal/queue"
-	"jarvis-gateway/internal/registration"
-	"jarvis-gateway/internal/session"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/credentials"
+	"duq-gateway/internal/queue"
+	"duq-gateway/internal/registration"
+	"duq-gateway/internal/session"
 )
 
 // ==================== Utility Function Tests ====================

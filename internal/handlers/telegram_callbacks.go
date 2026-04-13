@@ -124,7 +124,7 @@ func handleMenuSettings(w http.ResponseWriter, chatID int64, deps *TelegramDeps)
 func handleMenuHelp(w http.ResponseWriter, chatID int64, deps *TelegramDeps) {
 	helpText := `❓ *Помощь*
 
-🤖 Я — *Jarvis*, твой AI-ассистент.
+🤖 Я — *Duq*, твой AI-ассистент.
 
 *Что я умею:*
 • Отвечать на вопросы

@@ -7,9 +7,9 @@ import (
 	"log"
 	"net/http"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/db"
-	"jarvis-gateway/internal/queue"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/db"
+	"duq-gateway/internal/queue"
 )
 
 // MessageRequest - UNIFIED request format for ALL clients
@@ -62,9 +62,9 @@ func ProcessMessage(ctx context.Context, deps *APIDeps, req *MessageRequest) (*A
 		deps.RBACService.EnsureUser(telegramID, "", "", "")
 	}
 
-	// NOTE: Conversation history is now managed by Jarvis backend.
+	// NOTE: Conversation history is now managed by Duq backend.
 	// Gateway is pass-through — no session management here.
-	// Jarvis loads history from DB and saves messages automatically.
+	// Duq loads history from DB and saves messages automatically.
 
 	// User prefs
 	prefs := deps.DBClient.GetUserPreferencesByTelegramID(telegramID)
@@ -92,13 +92,13 @@ func ProcessMessage(ctx context.Context, deps *APIDeps, req *MessageRequest) (*A
 		}
 	}
 
-	// NOTE: Message saving removed — Jarvis handles this now
+	// NOTE: Message saving removed — Duq handles this now
 
 	// Callback URL
-	callbackURL := fmt.Sprintf("http://%s/api/jarvis/callback", deps.Config.GatewayHost)
+	callbackURL := fmt.Sprintf("http://%s/api/duq/callback", deps.Config.GatewayHost)
 
 	// Build task
-	// NOTE: ConversationID and history removed — Jarvis manages these
+	// NOTE: ConversationID and history removed — Duq manages these
 	task := &queue.Task{
 		UserID:      req.UserID,
 		Type:        "message",
@@ -108,7 +108,7 @@ func ProcessMessage(ctx context.Context, deps *APIDeps, req *MessageRequest) (*A
 			"message":        req.Message,
 			"output_channel": "telegram",
 			"allowed_tools":  allowedTools,
-			// NOTE: History removed — Jarvis loads from DB
+			// NOTE: History removed — Duq loads from DB
 			"user_preferences": map[string]string{
 				"timezone":           prefs.Timezone,
 				"preferred_language": prefs.PreferredLanguage,

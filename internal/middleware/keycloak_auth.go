@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/db"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/db"
 )
 
 // KeycloakClaims represents the JWT claims from Keycloak

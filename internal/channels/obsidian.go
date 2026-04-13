@@ -5,7 +5,7 @@ import (
 )
 
 // ObsidianChannel handles obsidian output
-// Note: Actual saving is done by Jarvis via MCP tools,
+// Note: Actual saving is done by Duq via MCP tools,
 // this channel just notifies the user
 type ObsidianChannel struct {
 	notifier *TelegramChannel
@@ -23,11 +23,11 @@ func (c *ObsidianChannel) Name() string {
 }
 
 func (c *ObsidianChannel) CanHandle(ctx *ResponseContext) bool {
-	return true // Obsidian is always available (saving done by Jarvis)
+	return true // Obsidian is always available (saving done by Duq)
 }
 
 func (c *ObsidianChannel) Send(ctx *ResponseContext) error {
-	log.Printf("[obsidian] Response saved to Obsidian (done by Jarvis)")
+	log.Printf("[obsidian] Response saved to Obsidian (done by Duq)")
 
 	// Notify user via telegram
 	if c.notifier != nil {

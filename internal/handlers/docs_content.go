@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"jarvis-gateway/internal/config"
+	"duq-gateway/internal/config"
 )
 
 // GET /api/docs/:name/content - Returns raw markdown content
@@ -34,7 +34,7 @@ func DocsContent(cfg *config.Config) http.HandlerFunc {
 		// Build full path using configured docs path
 		docsPath := cfg.DocsPath
 		if docsPath == "" {
-			docsPath = "/opt/obsidian-vault/Coding/jarvis" // fallback for backwards compatibility
+			docsPath = "/opt/obsidian-vault/Coding/duq" // fallback for backwards compatibility
 		}
 		fullPath := filepath.Join(docsPath, docName)
 

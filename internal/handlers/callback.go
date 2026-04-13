@@ -8,10 +8,10 @@ import (
 	"log"
 	"net/http"
 
-	"jarvis-gateway/internal/channels"
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/jarvis"
-	"jarvis-gateway/internal/session"
+	"duq-gateway/internal/channels"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/duq"
+	"duq-gateway/internal/session"
 )
 
 // CallbackDeps contains dependencies for the callback handler
@@ -21,9 +21,9 @@ type CallbackDeps struct {
 	ChannelRouter  *channels.Router
 }
 
-// JarvisCallback handles callbacks from Jarvis TwoLevelWorker.
-// When a queued task completes, Jarvis POSTs the result here.
-func JarvisCallback(deps *CallbackDeps) http.HandlerFunc {
+// DuqCallback handles callbacks from Duq TwoLevelWorker.
+// When a queued task completes, Duq POSTs the result here.
+func DuqCallback(deps *CallbackDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -33,7 +33,7 @@ func JarvisCallback(deps *CallbackDeps) http.HandlerFunc {
 		}
 		defer r.Body.Close()
 
-		var payload jarvis.CallbackPayload
+		var payload duq.CallbackPayload
 		if err := json.Unmarshal(body, &payload); err != nil {
 			log.Printf("[callback] Failed to decode payload: %v", err)
 			http.Error(w, "Invalid JSON", http.StatusBadRequest)
@@ -56,7 +56,7 @@ func JarvisCallback(deps *CallbackDeps) http.HandlerFunc {
 			if ch, ok := payload.Result["channel"].(string); ok {
 				outputChannel = ch
 			}
-			// Extract voice data from Jarvis worker (base64 encoded)
+			// Extract voice data from Duq worker (base64 encoded)
 			if vd, ok := payload.Result["voice_data"].(string); ok && vd != "" {
 				decoded, err := base64.StdEncoding.DecodeString(vd)
 				if err != nil {

@@ -126,8 +126,8 @@ type TelegramSendRequest struct {
 	Voice  bool   `json:"voice"` // If true, also send TTS voice note
 }
 
-// JarvisTranscribeResponse represents Jarvis /api/voice/transcribe response
-type JarvisTranscribeResponse struct {
+// DuqTranscribeResponse represents Duq /api/voice/transcribe response
+type DuqTranscribeResponse struct {
 	Transcription string `json:"transcription"`
 	Success       bool   `json:"success"`
 }

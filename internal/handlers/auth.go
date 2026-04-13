@@ -9,8 +9,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/db"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/db"
 )
 
 // QRGenerateRequest represents a QR code generation request
@@ -68,7 +68,7 @@ func QRGenerate(cfg *config.Config, dbClient *db.Client) http.HandlerFunc {
 
 		response := QRGenerateResponse{
 			Code:      qr.Code,
-			QRData:    "jarvis://auth?code=" + qr.Code,
+			QRData:    "duq://auth?code=" + qr.Code,
 			ExpiresIn: int(qrTTL.Seconds()),
 		}
 
@@ -118,7 +118,7 @@ func QRVerify(cfg *config.Config, dbClient *db.Client) http.HandlerFunc {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusForbidden)
 			json.NewEncoder(w).Encode(QRVerifyError{
-				Error:        "User not registered. Please send /start to Jarvis Telegram bot first.",
+				Error:        "User not registered. Please send /start to Duq Telegram bot first.",
 				Code:         "USER_NOT_REGISTERED",
 				NeedRegister: true,
 			})

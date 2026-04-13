@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"jarvis-gateway/internal/config"
+	"duq-gateway/internal/config"
 )
 
 // TestInitKeycloakClient tests that InitKeycloakClient initializes the client with correct timeout
@@ -155,8 +155,8 @@ func TestKeycloakLoginEnabled(t *testing.T) {
 		Keycloak: config.KeycloakConfig{
 			Enabled:  true,
 			URL:      "http://keycloak:8180",
-			Realm:    "jarvis",
-			ClientID: "jarvis-gateway",
+			Realm:    "duq",
+			ClientID: "duq-gateway",
 		},
 		GatewayHost: "localhost:8082",
 		TLS: config.TLSConfig{
@@ -183,8 +183,8 @@ func TestKeycloakLoginEnabled(t *testing.T) {
 	// Verify redirect URL contains expected components
 	expectedParts := []string{
 		"http://keycloak:8180",
-		"/realms/jarvis/protocol/openid-connect/auth",
-		"client_id=jarvis-gateway",
+		"/realms/duq/protocol/openid-connect/auth",
+		"client_id=duq-gateway",
 		"response_type=code",
 		"scope=openid",
 	}
@@ -268,7 +268,7 @@ func TestKeycloakLogoutNoBody(t *testing.T) {
 		Keycloak: config.KeycloakConfig{
 			Enabled: true,
 			URL:     "http://keycloak:8180",
-			Realm:   "jarvis",
+			Realm:   "duq",
 		},
 		GatewayHost: "localhost:8082",
 	}

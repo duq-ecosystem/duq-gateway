@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"jarvis-gateway/internal/registration"
+	"duq-gateway/internal/registration"
 )
 
 // handleTelegramCommand processes Telegram bot commands
@@ -145,7 +145,7 @@ func handleStartCommand(w http.ResponseWriter, msg *TelegramMessage, deps *Teleg
 			}
 
 			// Welcome message for new user with buttons
-			welcomeText := fmt.Sprintf(`🎉 *Добро пожаловать в Jarvis, %s!*
+			welcomeText := fmt.Sprintf(`🎉 *Добро пожаловать в Duq, %s!*
 
 Твой аккаунт создан успешно.
 
@@ -187,7 +187,7 @@ func handleStartCommand(w http.ResponseWriter, msg *TelegramMessage, deps *Teleg
 	}
 
 	// Fallback if no RegistrationService configured
-	SendTelegramMessageWithKeyboard(deps.Config, telegramID, `🤖 *Jarvis*
+	SendTelegramMessageWithKeyboard(deps.Config, telegramID, `🤖 *Duq*
 
 Просто напиши мне или отправь голосовое сообщение!`, getMainMenuKeyboard())
 	w.WriteHeader(http.StatusOK)
@@ -199,7 +199,7 @@ func handleHelpCommand(w http.ResponseWriter, msg *TelegramMessage, deps *Telegr
 
 	helpText := `❓ *Помощь*
 
-🤖 Я — *Jarvis*, твой AI-ассистент.
+🤖 Я — *Duq*, твой AI-ассистент.
 
 *Что я умею:*
 • Отвечать на вопросы

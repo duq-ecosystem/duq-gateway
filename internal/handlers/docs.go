@@ -14,7 +14,7 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/renderer/html"
 
-	"jarvis-gateway/internal/config"
+	"duq-gateway/internal/config"
 )
 
 var md = goldmark.New(
@@ -30,20 +30,20 @@ const pageTemplate = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}} - Jarvis</title>
+    <title>{{.Title}} - Duq</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --jarvis-blue: #00d4ff;
-            --jarvis-blue-dim: #0099cc;
-            --jarvis-orange: #ff6b35;
-            --jarvis-bg: #0a0e14;
-            --jarvis-surface: #0d1219;
-            --jarvis-sidebar: #080b0f;
-            --jarvis-border: #1a2332;
-            --jarvis-text: #e0e6ed;
-            --jarvis-text-dim: #6b7c93;
+            --duq-blue: #00d4ff;
+            --duq-blue-dim: #0099cc;
+            --duq-orange: #ff6b35;
+            --duq-bg: #0a0e14;
+            --duq-surface: #0d1219;
+            --duq-sidebar: #080b0f;
+            --duq-border: #1a2332;
+            --duq-text: #e0e6ed;
+            --duq-text-dim: #6b7c93;
             --glow-blue: 0 0 20px rgba(0, 212, 255, 0.3);
             --glow-orange: 0 0 20px rgba(255, 107, 53, 0.3);
         }
@@ -54,8 +54,8 @@ const pageTemplate = `<!DOCTYPE html>
             font-family: 'Rajdhani', sans-serif;
             font-weight: 500;
             line-height: 1.7;
-            background: var(--jarvis-bg);
-            color: var(--jarvis-text);
+            background: var(--duq-bg);
+            color: var(--duq-text);
             min-height: 100vh;
             display: flex;
         }
@@ -87,8 +87,8 @@ const pageTemplate = `<!DOCTYPE html>
         .sidebar {
             width: 280px;
             min-width: 280px;
-            background: var(--jarvis-sidebar);
-            border-right: 1px solid var(--jarvis-border);
+            background: var(--duq-sidebar);
+            border-right: 1px solid var(--duq-border);
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -101,7 +101,7 @@ const pageTemplate = `<!DOCTYPE html>
 
         .sidebar-header {
             padding: 25px 20px;
-            border-bottom: 1px solid var(--jarvis-border);
+            border-bottom: 1px solid var(--duq-border);
             position: relative;
         }
 
@@ -112,14 +112,14 @@ const pageTemplate = `<!DOCTYPE html>
             left: 20px;
             right: 20px;
             height: 1px;
-            background: linear-gradient(90deg, var(--jarvis-blue), transparent);
+            background: linear-gradient(90deg, var(--duq-blue), transparent);
         }
 
         .logo {
             font-family: 'Orbitron', monospace;
             font-size: 1.4em;
             font-weight: 700;
-            color: var(--jarvis-blue);
+            color: var(--duq-blue);
             text-transform: uppercase;
             letter-spacing: 4px;
             text-shadow: var(--glow-blue);
@@ -131,7 +131,7 @@ const pageTemplate = `<!DOCTYPE html>
         .logo-icon {
             width: 35px;
             height: 35px;
-            border: 2px solid var(--jarvis-blue);
+            border: 2px solid var(--duq-blue);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -143,7 +143,7 @@ const pageTemplate = `<!DOCTYPE html>
             content: '';
             width: 12px;
             height: 12px;
-            background: var(--jarvis-blue);
+            background: var(--duq-blue);
             border-radius: 50%;
         }
 
@@ -161,7 +161,7 @@ const pageTemplate = `<!DOCTYPE html>
         .nav-section-title {
             font-family: 'Orbitron', monospace;
             font-size: 0.7em;
-            color: var(--jarvis-text-dim);
+            color: var(--duq-text-dim);
             text-transform: uppercase;
             letter-spacing: 2px;
             padding: 10px 10px 8px;
@@ -174,7 +174,7 @@ const pageTemplate = `<!DOCTYPE html>
             content: '';
             width: 4px;
             height: 4px;
-            background: var(--jarvis-orange);
+            background: var(--duq-orange);
             border-radius: 50%;
         }
 
@@ -191,7 +191,7 @@ const pageTemplate = `<!DOCTYPE html>
             align-items: center;
             gap: 10px;
             padding: 10px 15px;
-            color: var(--jarvis-text-dim);
+            color: var(--duq-text-dim);
             text-decoration: none;
             font-size: 0.95em;
             border-radius: 6px;
@@ -204,33 +204,33 @@ const pageTemplate = `<!DOCTYPE html>
             content: '';
             width: 6px;
             height: 6px;
-            border: 1px solid var(--jarvis-text-dim);
+            border: 1px solid var(--duq-text-dim);
             border-radius: 2px;
             transition: all 0.2s ease;
         }
 
         .nav-link:hover {
-            color: var(--jarvis-blue);
+            color: var(--duq-blue);
             background: rgba(0, 212, 255, 0.05);
             border-color: rgba(0, 212, 255, 0.2);
         }
 
         .nav-link:hover::before {
-            border-color: var(--jarvis-blue);
-            background: var(--jarvis-blue);
+            border-color: var(--duq-blue);
+            background: var(--duq-blue);
         }
 
         .nav-link.active {
-            color: var(--jarvis-blue);
+            color: var(--duq-blue);
             background: rgba(0, 212, 255, 0.1);
-            border-color: var(--jarvis-blue);
+            border-color: var(--duq-blue);
             box-shadow: var(--glow-blue);
         }
 
         .nav-link.active::before {
-            border-color: var(--jarvis-blue);
-            background: var(--jarvis-blue);
-            box-shadow: 0 0 8px var(--jarvis-blue);
+            border-color: var(--duq-blue);
+            background: var(--duq-blue);
+            box-shadow: 0 0 8px var(--duq-blue);
         }
 
         .health-btn {
@@ -250,7 +250,7 @@ const pageTemplate = `<!DOCTYPE html>
             margin-top: 10px;
             font-size: 0.75em;
             padding: 8px 10px;
-            background: var(--jarvis-surface);
+            background: var(--duq-surface);
             border-radius: 6px;
             display: none;
         }
@@ -263,7 +263,7 @@ const pageTemplate = `<!DOCTYPE html>
             display: flex;
             justify-content: space-between;
             padding: 3px 0;
-            border-bottom: 1px solid var(--jarvis-border);
+            border-bottom: 1px solid var(--duq-border);
         }
 
         .health-details .detail-row:last-child {
@@ -271,15 +271,15 @@ const pageTemplate = `<!DOCTYPE html>
         }
 
         .health-details .label {
-            color: var(--jarvis-text-dim);
+            color: var(--duq-text-dim);
         }
 
         .health-details .value {
-            color: var(--jarvis-blue);
+            color: var(--duq-blue);
         }
 
         .status-dot.checking {
-            background: var(--jarvis-orange);
+            background: var(--duq-orange);
             animation: pulse 0.5s ease-in-out infinite;
         }
 
@@ -289,9 +289,9 @@ const pageTemplate = `<!DOCTYPE html>
 
         .sidebar-footer {
             padding: 15px 20px;
-            border-top: 1px solid var(--jarvis-border);
+            border-top: 1px solid var(--duq-border);
             font-size: 0.8em;
-            color: var(--jarvis-text-dim);
+            color: var(--duq-text-dim);
         }
 
         .status-indicator {
@@ -320,7 +320,7 @@ const pageTemplate = `<!DOCTYPE html>
             top: 0;
             background: rgba(10, 14, 20, 0.95);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--jarvis-border);
+            border-bottom: 1px solid var(--duq-border);
             padding: 15px 30px;
             display: flex;
             align-items: center;
@@ -336,21 +336,21 @@ const pageTemplate = `<!DOCTYPE html>
         }
 
         .breadcrumb a {
-            color: var(--jarvis-text-dim);
+            color: var(--duq-text-dim);
             text-decoration: none;
             transition: color 0.2s;
         }
 
         .breadcrumb a:hover {
-            color: var(--jarvis-blue);
+            color: var(--duq-blue);
         }
 
         .breadcrumb-sep {
-            color: var(--jarvis-border);
+            color: var(--duq-border);
         }
 
         .breadcrumb-current {
-            color: var(--jarvis-blue);
+            color: var(--duq-blue);
             font-weight: 600;
         }
 
@@ -362,8 +362,8 @@ const pageTemplate = `<!DOCTYPE html>
         .topbar-btn {
             padding: 8px 16px;
             background: transparent;
-            border: 1px solid var(--jarvis-border);
-            color: var(--jarvis-text-dim);
+            border: 1px solid var(--duq-border);
+            color: var(--duq-text-dim);
             border-radius: 6px;
             font-family: inherit;
             font-size: 0.85em;
@@ -373,8 +373,8 @@ const pageTemplate = `<!DOCTYPE html>
         }
 
         .topbar-btn:hover {
-            border-color: var(--jarvis-blue);
-            color: var(--jarvis-blue);
+            border-color: var(--duq-blue);
+            color: var(--duq-blue);
             box-shadow: var(--glow-blue);
         }
 
@@ -388,7 +388,7 @@ const pageTemplate = `<!DOCTYPE html>
         h1 {
             font-family: 'Orbitron', monospace;
             font-size: 2em;
-            color: var(--jarvis-blue);
+            color: var(--duq-blue);
             margin-bottom: 30px;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -401,54 +401,54 @@ const pageTemplate = `<!DOCTYPE html>
             position: absolute;
             bottom: 0; left: 0;
             width: 60px; height: 3px;
-            background: var(--jarvis-orange);
+            background: var(--duq-orange);
             box-shadow: var(--glow-orange);
         }
 
         h2 {
             font-family: 'Orbitron', monospace;
             font-size: 1.3em;
-            color: var(--jarvis-text);
+            color: var(--duq-text);
             margin: 40px 0 20px;
             padding-bottom: 10px;
-            border-bottom: 1px solid var(--jarvis-border);
+            border-bottom: 1px solid var(--duq-border);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         h3 {
             font-size: 1.15em;
-            color: var(--jarvis-blue-dim);
+            color: var(--duq-blue-dim);
             margin: 25px 0 12px;
         }
 
         p { margin: 15px 0; }
 
         a {
-            color: var(--jarvis-blue);
+            color: var(--duq-blue);
             text-decoration: none;
             transition: all 0.2s ease;
         }
 
         a:hover {
-            color: var(--jarvis-orange);
+            color: var(--duq-orange);
             text-shadow: var(--glow-orange);
         }
 
         code {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.85em;
-            background: var(--jarvis-surface);
-            color: var(--jarvis-orange);
+            background: var(--duq-surface);
+            color: var(--duq-orange);
             padding: 3px 8px;
             border-radius: 4px;
-            border: 1px solid var(--jarvis-border);
+            border: 1px solid var(--duq-border);
         }
 
         pre {
-            background: var(--jarvis-surface);
-            border: 1px solid var(--jarvis-border);
-            border-left: 3px solid var(--jarvis-blue);
+            background: var(--duq-surface);
+            border: 1px solid var(--duq-border);
+            border-left: 3px solid var(--duq-blue);
             border-radius: 6px;
             padding: 20px;
             margin: 20px 0;
@@ -459,7 +459,7 @@ const pageTemplate = `<!DOCTYPE html>
             background: none;
             border: none;
             padding: 0;
-            color: var(--jarvis-text);
+            color: var(--duq-text);
         }
 
         table {
@@ -471,19 +471,19 @@ const pageTemplate = `<!DOCTYPE html>
 
         th {
             font-family: 'Orbitron', monospace;
-            background: var(--jarvis-surface);
-            color: var(--jarvis-blue);
+            background: var(--duq-surface);
+            color: var(--duq-blue);
             text-transform: uppercase;
             letter-spacing: 1px;
             font-size: 0.8em;
             padding: 12px 15px;
             text-align: left;
-            border-bottom: 2px solid var(--jarvis-blue);
+            border-bottom: 2px solid var(--duq-blue);
         }
 
         td {
             padding: 10px 15px;
-            border-bottom: 1px solid var(--jarvis-border);
+            border-bottom: 1px solid var(--duq-border);
         }
 
         tr:hover td {
@@ -491,12 +491,12 @@ const pageTemplate = `<!DOCTYPE html>
         }
 
         blockquote {
-            border-left: 3px solid var(--jarvis-orange);
+            border-left: 3px solid var(--duq-orange);
             background: rgba(255, 107, 53, 0.05);
             margin: 20px 0;
             padding: 15px 20px;
             border-radius: 0 6px 6px 0;
-            color: var(--jarvis-text-dim);
+            color: var(--duq-text-dim);
         }
 
         ul, ol {
@@ -515,8 +515,8 @@ const pageTemplate = `<!DOCTYPE html>
         }
 
         .doc-card {
-            background: var(--jarvis-surface);
-            border: 1px solid var(--jarvis-border);
+            background: var(--duq-surface);
+            border: 1px solid var(--duq-border);
             border-radius: 8px;
             padding: 20px;
             transition: all 0.3s ease;
@@ -529,14 +529,14 @@ const pageTemplate = `<!DOCTYPE html>
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 3px;
-            background: linear-gradient(90deg, var(--jarvis-blue), var(--jarvis-orange));
+            background: linear-gradient(90deg, var(--duq-blue), var(--duq-orange));
             transform: scaleX(0);
             transform-origin: left;
             transition: transform 0.3s ease;
         }
 
         .doc-card:hover {
-            border-color: var(--jarvis-blue);
+            border-color: var(--duq-blue);
             box-shadow: var(--glow-blue);
             transform: translateY(-3px);
         }
@@ -553,7 +553,7 @@ const pageTemplate = `<!DOCTYPE html>
 
         .doc-card-desc {
             font-size: 0.85em;
-            color: var(--jarvis-text-dim);
+            color: var(--duq-text-dim);
             margin-top: 8px;
         }
 
@@ -566,8 +566,8 @@ const pageTemplate = `<!DOCTYPE html>
             z-index: 200;
             width: 40px;
             height: 40px;
-            background: var(--jarvis-surface);
-            border: 1px solid var(--jarvis-border);
+            background: var(--duq-surface);
+            border: 1px solid var(--duq-border);
             border-radius: 8px;
             cursor: pointer;
             align-items: center;
@@ -577,7 +577,7 @@ const pageTemplate = `<!DOCTYPE html>
         .mobile-toggle span {
             width: 20px;
             height: 2px;
-            background: var(--jarvis-blue);
+            background: var(--duq-blue);
             display: block;
             position: relative;
         }
@@ -588,7 +588,7 @@ const pageTemplate = `<!DOCTYPE html>
             position: absolute;
             width: 100%;
             height: 2px;
-            background: var(--jarvis-blue);
+            background: var(--duq-blue);
             left: 0;
         }
 
@@ -617,7 +617,7 @@ const pageTemplate = `<!DOCTYPE html>
         <div class="sidebar-header">
             <div class="logo">
                 <div class="logo-icon"></div>
-                Jarvis
+                Duq
             </div>
         </div>
         <nav class="sidebar-nav">
@@ -753,7 +753,7 @@ func Docs(cfg *config.Config) http.HandlerFunc {
 
 		if path == "" {
 			// Redirect to landing page
-			http.Redirect(w, r, "/docs/Jarvis", http.StatusFound)
+			http.Redirect(w, r, "/docs/Duq", http.StatusFound)
 			return
 		}
 
@@ -787,7 +787,7 @@ func getDocList(docsPath string) []DocInfo {
 func serveDocList(w http.ResponseWriter, docs []DocInfo) {
 	var buf bytes.Buffer
 	buf.WriteString("<h1>Documentation</h1>\n")
-	buf.WriteString("<p>Jarvis system documentation and configuration reference.</p>\n")
+	buf.WriteString("<p>Duq system documentation and configuration reference.</p>\n")
 	buf.WriteString("<div class=\"doc-grid\">\n")
 
 	descriptions := map[string]string{

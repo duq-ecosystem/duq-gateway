@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"strings"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/jarvis"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/duq"
 )
 
 type GitHubWebhook struct {
@@ -47,7 +47,7 @@ type GitHubUser struct {
 }
 
 func GitHub(cfg *config.Config) http.HandlerFunc {
-	client := jarvis.NewClient(cfg)
+	client := duq.NewClient(cfg)
 	secret := cfg.GitHubSecret
 
 	return func(w http.ResponseWriter, r *http.Request) {

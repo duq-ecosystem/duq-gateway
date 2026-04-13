@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"jarvis-gateway/internal/session"
+	"duq-gateway/internal/session"
 )
 
 // MessageResponse represents a message in API responses

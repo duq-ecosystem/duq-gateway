@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/db"
-	"jarvis-gateway/internal/session"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/db"
+	"duq-gateway/internal/session"
 )
 
 // VoiceResponse represents the voice endpoint response
@@ -27,8 +27,8 @@ type VoiceErrorResponse struct {
 	Error string `json:"error"`
 }
 
-// JarvisVoiceResponse represents Jarvis /api/voice response
-type JarvisVoiceResponse struct {
+// DuqVoiceResponse represents Duq /api/voice response
+type DuqVoiceResponse struct {
 	Transcription string `json:"transcription"`
 	Response      string `json:"response"`
 	UserID        string `json:"user_id"`
@@ -46,15 +46,15 @@ type VoiceDeps struct {
 }
 
 // Voice handles voice message processing.
-// Proxies audio to Jarvis /api/voice which does:
+// Proxies audio to Duq /api/voice which does:
 // - STT (whisper-stt)
 // - Agent processing
 // - TTS (edge-tts)
 // - Returns OGG audio
 func Voice(deps *VoiceDeps) http.HandlerFunc {
-	jarvisURL := deps.Config.JarvisURL
-	if jarvisURL == "" {
-		jarvisURL = "http://localhost:8081"
+	duqURL := deps.Config.DuqURL
+	if duqURL == "" {
+		duqURL = "http://localhost:8081"
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -101,9 +101,9 @@ func Voice(deps *VoiceDeps) http.HandlerFunc {
 		// Get user preferences
 		prefs := deps.DBClient.GetUserPreferencesByTelegramID(telegramID)
 
-		// Proxy to Jarvis /api/voice
-		jarvisResp, err := proxyToJarvisVoice(
-			jarvisURL,
+		// Proxy to Duq /api/voice
+		duqResp, err := proxyToDuqVoice(
+			duqURL,
 			audioBytes,
 			header.Filename,
 			userID,
@@ -112,33 +112,33 @@ func Voice(deps *VoiceDeps) http.HandlerFunc {
 			prefs.PreferredLanguage,
 		)
 		if err != nil {
-			log.Printf("[voice] Jarvis /api/voice failed: %v", err)
+			log.Printf("[voice] Duq /api/voice failed: %v", err)
 			sendVoiceError(w, "Voice processing failed", http.StatusInternalServerError)
 			return
 		}
 
-		log.Printf("[voice] Jarvis response: transcription=%q, response=%q",
-			truncate(jarvisResp.Transcription, 50), truncate(jarvisResp.Response, 50))
+		log.Printf("[voice] Duq response: transcription=%q, response=%q",
+			truncate(duqResp.Transcription, 50), truncate(duqResp.Response, 50))
 
 		// Save messages to session
 		if convID != "" {
-			if err := deps.SessionService.SaveMessageSimple(convID, "user", jarvisResp.Transcription); err != nil {
+			if err := deps.SessionService.SaveMessageSimple(convID, "user", duqResp.Transcription); err != nil {
 				log.Printf("[voice] Failed to save user message: %v", err)
 			}
-			if err := deps.SessionService.SaveMessageSimple(convID, "assistant", jarvisResp.Response); err != nil {
+			if err := deps.SessionService.SaveMessageSimple(convID, "assistant", duqResp.Response); err != nil {
 				log.Printf("[voice] Failed to save assistant message: %v", err)
 			}
 		}
 
 		// Send to Telegram for cross-channel visibility
 		go func() {
-			userMsg := fmt.Sprintf("📱 *[Mobile App]*\n\n%s", jarvisResp.Transcription)
+			userMsg := fmt.Sprintf("📱 *[Mobile App]*\n\n%s", duqResp.Transcription)
 			if err := SendTelegramMessage(deps.Config, telegramID, userMsg); err != nil {
 				log.Printf("[voice] Failed to send user message to Telegram: %v", err)
 			}
 
-			cleanResponse := cleanAgentResponse(jarvisResp.Response)
-			assistantMsg := fmt.Sprintf("🤖 *[Jarvis]*\n\n%s", cleanResponse)
+			cleanResponse := cleanAgentResponse(duqResp.Response)
+			assistantMsg := fmt.Sprintf("🤖 *[Duq]*\n\n%s", cleanResponse)
 			if err := SendTelegramMessage(deps.Config, telegramID, assistantMsg); err != nil {
 				log.Printf("[voice] Failed to send assistant response to Telegram: %v", err)
 			}
@@ -146,8 +146,8 @@ func Voice(deps *VoiceDeps) http.HandlerFunc {
 
 		// Return response to mobile client
 		resp := VoiceResponse{
-			Text:  cleanAgentResponse(jarvisResp.Response),
-			Audio: jarvisResp.VoiceData, // Already base64 OGG from Jarvis
+			Text:  cleanAgentResponse(duqResp.Response),
+			Audio: duqResp.VoiceData, // Already base64 OGG from Duq
 		}
 
 		log.Printf("[voice] Success: text=%d chars, audio=%d bytes (base64)",
@@ -158,16 +158,16 @@ func Voice(deps *VoiceDeps) http.HandlerFunc {
 	}
 }
 
-// proxyToJarvisVoice sends audio to Jarvis /api/voice
-func proxyToJarvisVoice(
-	jarvisURL string,
+// proxyToDuqVoice sends audio to Duq /api/voice
+func proxyToDuqVoice(
+	duqURL string,
 	audioBytes []byte,
 	filename string,
 	userID string,
 	conversationID string,
 	timezone string,
 	preferredLanguage string,
-) (*JarvisVoiceResponse, error) {
+) (*DuqVoiceResponse, error) {
 	// Build multipart form
 	var buf bytes.Buffer
 	writer := multipart.NewWriter(&buf)
@@ -195,8 +195,8 @@ func proxyToJarvisVoice(
 
 	writer.Close()
 
-	// Send request to Jarvis
-	url := jarvisURL + "/api/voice"
+	// Send request to Duq
+	url := duqURL + "/api/voice"
 	log.Printf("[voice] POST %s (audio=%d bytes)", url, len(audioBytes))
 
 	client := &http.Client{Timeout: 120 * time.Second}
@@ -212,15 +212,15 @@ func proxyToJarvisVoice(
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("jarvis returned %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("duq returned %d: %s", resp.StatusCode, string(body))
 	}
 
-	var jarvisResp JarvisVoiceResponse
-	if err := json.Unmarshal(body, &jarvisResp); err != nil {
+	var duqResp DuqVoiceResponse
+	if err := json.Unmarshal(body, &duqResp); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return &jarvisResp, nil
+	return &duqResp, nil
 }
 
 func sendVoiceError(w http.ResponseWriter, message string, status int) {
@@ -240,7 +240,7 @@ func truncate(s string, maxLen int) string {
 // cleanAgentResponse removes debug output lines from agent response
 func cleanAgentResponse(response string) string {
 	debugPrefixes := []string{
-		"[jarvis-memory]",
+		"[duq-memory]",
 		"[memory]",
 		"[plugin]",
 		"[debug]",

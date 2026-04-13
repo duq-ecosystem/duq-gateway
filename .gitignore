@@ -1,6 +1,6 @@
 # Binaries
-vtoroy-gateway
-vtoroy-gateway-linux
+duq-gateway
+duq-gateway-linux
 *.exe
 
 # Config with secrets
@@ -13,4 +13,3 @@ config.json
 
 # OS
 .DS_Store
-jarvis-gateway-linux

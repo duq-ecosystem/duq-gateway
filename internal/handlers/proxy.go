@@ -9,13 +9,13 @@ import (
 	"strings"
 	"time"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/db"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/db"
 )
 
-// jarvisProxyClient is a shared HTTP client with timeout for proxy requests
+// duqProxyClient is a shared HTTP client with timeout for proxy requests
 // Initialized via InitProxyClient with config
-var jarvisProxyClient *http.Client
+var duqProxyClient *http.Client
 
 // InitProxyClient initializes the proxy HTTP client with configured timeout
 func InitProxyClient(cfg *config.Config) {
@@ -23,7 +23,7 @@ func InitProxyClient(cfg *config.Config) {
 	if timeout == 0 {
 		timeout = 60 * time.Second // fallback default
 	}
-	jarvisProxyClient = &http.Client{
+	duqProxyClient = &http.Client{
 		Timeout: timeout,
 	}
 }
@@ -54,8 +54,8 @@ func enforceUserIDAccess(requestedUserID string, contextUserID int64, role strin
 	return requested == contextUserID
 }
 
-// proxyToJarvis forwards request to jarvis backend with RBAC enforcement
-func proxyToJarvis(w http.ResponseWriter, r *http.Request, jarvisURL string, enforceUserID bool) {
+// proxyToDuq forwards request to duq backend with RBAC enforcement
+func proxyToDuq(w http.ResponseWriter, r *http.Request, duqURL string, enforceUserID bool) {
 	// Get user context from JWT middleware
 	userID, ok := r.Context().Value("user_id").(int64)
 	if !ok {
@@ -88,7 +88,7 @@ func proxyToJarvis(w http.ResponseWriter, r *http.Request, jarvisURL string, enf
 	}
 
 	// Build full URL
-	fullURL := jarvisURL + "?" + query.Encode()
+	fullURL := duqURL + "?" + query.Encode()
 	log.Printf("[proxy] %s %s (user=%d, role=%s)", r.Method, fullURL, userID, role)
 
 	// Create new request
@@ -106,7 +106,7 @@ func proxyToJarvis(w http.ResponseWriter, r *http.Request, jarvisURL string, enf
 	}
 
 	// Execute request
-	resp, err := jarvisProxyClient.Do(proxyReq)
+	resp, err := duqProxyClient.Do(proxyReq)
 	if err != nil {
 		log.Printf("[proxy] Error: %v", err)
 		http.Error(w, "Failed to proxy request", http.StatusBadGateway)
@@ -131,8 +131,8 @@ func proxyToJarvis(w http.ResponseWriter, r *http.Request, jarvisURL string, enf
 // ProxyWorkflowsList proxies GET /api/workflows with RBAC
 func ProxyWorkflowsList(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		jarvisURL := deps.Config.JarvisURL + "/api/workflows"
-		proxyToJarvis(w, r, jarvisURL, true) // enforce user_id
+		duqURL := deps.Config.DuqURL + "/api/workflows"
+		proxyToDuq(w, r, duqURL, true) // enforce user_id
 	}
 }
 
@@ -164,10 +164,10 @@ func ProxyWorkflowCreate(deps *ProxyDeps) http.HandlerFunc {
 		query := r.URL.Query()
 		query.Set("user_id", strconv.FormatInt(userID, 10))
 
-		jarvisURL := deps.Config.JarvisURL + "/api/workflows?" + query.Encode()
+		duqURL := deps.Config.DuqURL + "/api/workflows?" + query.Encode()
 
 		// Create new request with modified body
-		proxyReq, err := http.NewRequestWithContext(r.Context(), "POST", jarvisURL, strings.NewReader(string(body)))
+		proxyReq, err := http.NewRequestWithContext(r.Context(), "POST", duqURL, strings.NewReader(string(body)))
 		if err != nil {
 			http.Error(w, "Failed to create proxy request", http.StatusInternalServerError)
 			return
@@ -175,7 +175,7 @@ func ProxyWorkflowCreate(deps *ProxyDeps) http.HandlerFunc {
 
 		proxyReq.Header.Set("Content-Type", "application/json")
 
-		resp, err := jarvisProxyClient.Do(proxyReq)
+		resp, err := duqProxyClient.Do(proxyReq)
 		if err != nil {
 			log.Printf("[proxy] Workflow create error: %v", err)
 			http.Error(w, "Failed to create workflow", http.StatusBadGateway)
@@ -193,8 +193,8 @@ func ProxyWorkflowCreate(deps *ProxyDeps) http.HandlerFunc {
 func ProxyWorkflowGet(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		workflowID := r.PathValue("id")
-		jarvisURL := deps.Config.JarvisURL + "/api/workflows/" + workflowID
-		proxyToJarvis(w, r, jarvisURL, false) // no user_id enforcement on GET by ID
+		duqURL := deps.Config.DuqURL + "/api/workflows/" + workflowID
+		proxyToDuq(w, r, duqURL, false) // no user_id enforcement on GET by ID
 	}
 }
 
@@ -202,8 +202,8 @@ func ProxyWorkflowGet(deps *ProxyDeps) http.HandlerFunc {
 func ProxyWorkflowDelete(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		workflowID := r.PathValue("id")
-		jarvisURL := deps.Config.JarvisURL + "/api/workflows/" + workflowID
-		proxyToJarvis(w, r, jarvisURL, false)
+		duqURL := deps.Config.DuqURL + "/api/workflows/" + workflowID
+		proxyToDuq(w, r, duqURL, false)
 	}
 }
 
@@ -211,16 +211,16 @@ func ProxyWorkflowDelete(deps *ProxyDeps) http.HandlerFunc {
 func ProxyWorkflowRun(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		workflowID := r.PathValue("id")
-		jarvisURL := deps.Config.JarvisURL + "/api/workflows/" + workflowID + "/run"
-		proxyToJarvis(w, r, jarvisURL, false)
+		duqURL := deps.Config.DuqURL + "/api/workflows/" + workflowID + "/run"
+		proxyToDuq(w, r, duqURL, false)
 	}
 }
 
 // ProxyRecurringList proxies GET /api/recurring with RBAC
 func ProxyRecurringList(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		jarvisURL := deps.Config.JarvisURL + "/api/recurring"
-		proxyToJarvis(w, r, jarvisURL, true) // enforce user_id
+		duqURL := deps.Config.DuqURL + "/api/recurring"
+		proxyToDuq(w, r, duqURL, true) // enforce user_id
 	}
 }
 
@@ -236,13 +236,13 @@ func ProxyRecurringCreate(deps *ProxyDeps) http.HandlerFunc {
 		query := r.URL.Query()
 		query.Set("user_id", strconv.FormatInt(userID, 10))
 
-		jarvisURL := deps.Config.JarvisURL + "/api/recurring?" + query.Encode()
+		duqURL := deps.Config.DuqURL + "/api/recurring?" + query.Encode()
 
 		body, _ := io.ReadAll(r.Body)
-		proxyReq, _ := http.NewRequestWithContext(r.Context(), "POST", jarvisURL, strings.NewReader(string(body)))
+		proxyReq, _ := http.NewRequestWithContext(r.Context(), "POST", duqURL, strings.NewReader(string(body)))
 		proxyReq.Header.Set("Content-Type", "application/json")
 
-		resp, err := jarvisProxyClient.Do(proxyReq)
+		resp, err := duqProxyClient.Do(proxyReq)
 		if err != nil {
 			http.Error(w, "Failed to create recurring task", http.StatusBadGateway)
 			return
@@ -259,8 +259,8 @@ func ProxyRecurringCreate(deps *ProxyDeps) http.HandlerFunc {
 func ProxyRecurringDelete(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		taskID := r.PathValue("id")
-		jarvisURL := deps.Config.JarvisURL + "/api/recurring/" + taskID
-		proxyToJarvis(w, r, jarvisURL, false)
+		duqURL := deps.Config.DuqURL + "/api/recurring/" + taskID
+		proxyToDuq(w, r, duqURL, false)
 	}
 }
 
@@ -268,8 +268,8 @@ func ProxyRecurringDelete(deps *ProxyDeps) http.HandlerFunc {
 func ProxyCortexSearch(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Cortex searches are implicitly scoped by user via backend
-		jarvisURL := deps.Config.JarvisURL + "/api/cortex/search"
-		proxyToJarvis(w, r, jarvisURL, false)
+		duqURL := deps.Config.DuqURL + "/api/cortex/search"
+		proxyToDuq(w, r, duqURL, false)
 	}
 }
 
@@ -299,12 +299,12 @@ func ProxyCortexStore(deps *ProxyDeps) http.HandlerFunc {
 		payload["user_id"] = strconv.FormatInt(userID, 10)
 
 		modifiedBody, _ := json.Marshal(payload)
-		jarvisURL := deps.Config.JarvisURL + "/api/cortex/store"
+		duqURL := deps.Config.DuqURL + "/api/cortex/store"
 
-		proxyReq, _ := http.NewRequestWithContext(r.Context(), "POST", jarvisURL, strings.NewReader(string(modifiedBody)))
+		proxyReq, _ := http.NewRequestWithContext(r.Context(), "POST", duqURL, strings.NewReader(string(modifiedBody)))
 		proxyReq.Header.Set("Content-Type", "application/json")
 
-		resp, err := jarvisProxyClient.Do(proxyReq)
+		resp, err := duqProxyClient.Do(proxyReq)
 		if err != nil {
 			http.Error(w, "Failed to store memory", http.StatusBadGateway)
 			return
@@ -321,16 +321,16 @@ func ProxyCortexStore(deps *ProxyDeps) http.HandlerFunc {
 func ProxyQueueStats(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Queue stats are global, available to all authenticated users
-		jarvisURL := deps.Config.JarvisURL + "/api/queue/stats/overview"
-		proxyToJarvis(w, r, jarvisURL, false)
+		duqURL := deps.Config.DuqURL + "/api/queue/stats/overview"
+		proxyToDuq(w, r, duqURL, false)
 	}
 }
 
 // ProxyHeartbeatConfig proxies GET /api/heartbeat/config with RBAC
 func ProxyHeartbeatConfig(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		jarvisURL := deps.Config.JarvisURL + "/api/heartbeat/config"
-		proxyToJarvis(w, r, jarvisURL, true) // enforce user_id
+		duqURL := deps.Config.DuqURL + "/api/heartbeat/config"
+		proxyToDuq(w, r, duqURL, true) // enforce user_id
 	}
 }
 
@@ -346,13 +346,13 @@ func ProxyHeartbeatUpdate(deps *ProxyDeps) http.HandlerFunc {
 		query := r.URL.Query()
 		query.Set("user_id", strconv.FormatInt(userID, 10))
 
-		jarvisURL := deps.Config.JarvisURL + "/api/heartbeat/config?" + query.Encode()
+		duqURL := deps.Config.DuqURL + "/api/heartbeat/config?" + query.Encode()
 
 		body, _ := io.ReadAll(r.Body)
-		proxyReq, _ := http.NewRequestWithContext(r.Context(), "PUT", jarvisURL, strings.NewReader(string(body)))
+		proxyReq, _ := http.NewRequestWithContext(r.Context(), "PUT", duqURL, strings.NewReader(string(body)))
 		proxyReq.Header.Set("Content-Type", "application/json")
 
-		resp, err := jarvisProxyClient.Do(proxyReq)
+		resp, err := duqProxyClient.Do(proxyReq)
 		if err != nil {
 			http.Error(w, "Failed to update heartbeat config", http.StatusBadGateway)
 			return
@@ -377,11 +377,11 @@ func ProxyHeartbeatRun(deps *ProxyDeps) http.HandlerFunc {
 		query := r.URL.Query()
 		query.Set("user_id", strconv.FormatInt(userID, 10))
 
-		jarvisURL := deps.Config.JarvisURL + "/api/heartbeat/run?" + query.Encode()
+		duqURL := deps.Config.DuqURL + "/api/heartbeat/run?" + query.Encode()
 
-		proxyReq, _ := http.NewRequestWithContext(r.Context(), "POST", jarvisURL, nil)
+		proxyReq, _ := http.NewRequestWithContext(r.Context(), "POST", duqURL, nil)
 
-		resp, err := jarvisProxyClient.Do(proxyReq)
+		resp, err := duqProxyClient.Do(proxyReq)
 		if err != nil {
 			http.Error(w, "Failed to run heartbeat", http.StatusBadGateway)
 			return
@@ -397,52 +397,52 @@ func ProxyHeartbeatRun(deps *ProxyDeps) http.HandlerFunc {
 // ProxyHeartbeatChecks proxies GET /api/heartbeat/checks
 func ProxyHeartbeatChecks(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		jarvisURL := deps.Config.JarvisURL + "/api/heartbeat/checks"
-		proxyToJarvis(w, r, jarvisURL, false)
+		duqURL := deps.Config.DuqURL + "/api/heartbeat/checks"
+		proxyToDuq(w, r, duqURL, false)
 	}
 }
 
 // ProxyRecurringPreview proxies GET /api/recurring/preview
 func ProxyRecurringPreview(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		jarvisURL := deps.Config.JarvisURL + "/api/recurring/preview"
-		proxyToJarvis(w, r, jarvisURL, false)
+		duqURL := deps.Config.DuqURL + "/api/recurring/preview"
+		proxyToDuq(w, r, duqURL, false)
 	}
 }
 
 // ProxyMonitoringLLMUsage proxies GET /api/monitoring/llm/usage
 func ProxyMonitoringLLMUsage(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		jarvisURL := deps.Config.JarvisURL + "/api/monitoring/llm/usage"
-		proxyToJarvis(w, r, jarvisURL, false)
+		duqURL := deps.Config.DuqURL + "/api/monitoring/llm/usage"
+		proxyToDuq(w, r, duqURL, false)
 	}
 }
 
 // ProxyMonitoringStats proxies GET /api/monitoring/stats/summary
 func ProxyMonitoringStats(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		jarvisURL := deps.Config.JarvisURL + "/api/monitoring/stats/summary"
-		proxyToJarvis(w, r, jarvisURL, false)
+		duqURL := deps.Config.DuqURL + "/api/monitoring/stats/summary"
+		proxyToDuq(w, r, duqURL, false)
 	}
 }
 
 // ProxyMonitoringEvents proxies GET /api/monitoring/events
 func ProxyMonitoringEvents(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		jarvisURL := deps.Config.JarvisURL + "/api/monitoring/events"
-		proxyToJarvis(w, r, jarvisURL, false)
+		duqURL := deps.Config.DuqURL + "/api/monitoring/events"
+		proxyToDuq(w, r, duqURL, false)
 	}
 }
 
 // =============================================================================
-// Conversations Proxy (Jarvis owns conversation storage)
+// Conversations Proxy (Duq owns conversation storage)
 // =============================================================================
 
 // ProxyConversationsList proxies GET /api/conversations with RBAC
 func ProxyConversationsList(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		jarvisURL := deps.Config.JarvisURL + "/api/conversations"
-		proxyToJarvis(w, r, jarvisURL, true) // enforce user_id
+		duqURL := deps.Config.DuqURL + "/api/conversations"
+		proxyToDuq(w, r, duqURL, true) // enforce user_id
 	}
 }
 
@@ -477,12 +477,12 @@ func ProxyConversationsCreate(deps *ProxyDeps) http.HandlerFunc {
 		payload["user_id"] = userID
 
 		modifiedBody, _ := json.Marshal(payload)
-		jarvisURL := deps.Config.JarvisURL + "/api/conversations"
+		duqURL := deps.Config.DuqURL + "/api/conversations"
 
-		proxyReq, _ := http.NewRequestWithContext(r.Context(), "POST", jarvisURL, strings.NewReader(string(modifiedBody)))
+		proxyReq, _ := http.NewRequestWithContext(r.Context(), "POST", duqURL, strings.NewReader(string(modifiedBody)))
 		proxyReq.Header.Set("Content-Type", "application/json")
 
-		resp, err := jarvisProxyClient.Do(proxyReq)
+		resp, err := duqProxyClient.Do(proxyReq)
 		if err != nil {
 			log.Printf("[proxy] Conversation create error: %v", err)
 			http.Error(w, "Failed to create conversation", http.StatusBadGateway)
@@ -500,13 +500,13 @@ func ProxyConversationsCreate(deps *ProxyDeps) http.HandlerFunc {
 func ProxyConversationsUpdate(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conversationID := r.PathValue("id")
-		jarvisURL := deps.Config.JarvisURL + "/api/conversations/" + conversationID
+		duqURL := deps.Config.DuqURL + "/api/conversations/" + conversationID
 
 		body, _ := io.ReadAll(r.Body)
-		proxyReq, _ := http.NewRequestWithContext(r.Context(), "PUT", jarvisURL, strings.NewReader(string(body)))
+		proxyReq, _ := http.NewRequestWithContext(r.Context(), "PUT", duqURL, strings.NewReader(string(body)))
 		proxyReq.Header.Set("Content-Type", "application/json")
 
-		resp, err := jarvisProxyClient.Do(proxyReq)
+		resp, err := duqProxyClient.Do(proxyReq)
 		if err != nil {
 			log.Printf("[proxy] Conversation update error: %v", err)
 			http.Error(w, "Failed to update conversation", http.StatusBadGateway)
@@ -524,8 +524,8 @@ func ProxyConversationsUpdate(deps *ProxyDeps) http.HandlerFunc {
 func ProxyConversationsEnd(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conversationID := r.PathValue("id")
-		jarvisURL := deps.Config.JarvisURL + "/api/conversations/" + conversationID
-		proxyToJarvis(w, r, jarvisURL, false)
+		duqURL := deps.Config.DuqURL + "/api/conversations/" + conversationID
+		proxyToDuq(w, r, duqURL, false)
 	}
 }
 
@@ -533,7 +533,7 @@ func ProxyConversationsEnd(deps *ProxyDeps) http.HandlerFunc {
 func ProxyConversationsMessages(deps *ProxyDeps) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conversationID := r.PathValue("id")
-		jarvisURL := deps.Config.JarvisURL + "/api/conversations/" + conversationID + "/messages"
-		proxyToJarvis(w, r, jarvisURL, false)
+		duqURL := deps.Config.DuqURL + "/api/conversations/" + conversationID + "/messages"
+		proxyToDuq(w, r, duqURL, false)
 	}
 }

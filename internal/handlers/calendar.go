@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/jarvis"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/duq"
 )
 
 type CalendarEvent struct {
@@ -27,7 +27,7 @@ type CalendarWebhook struct {
 }
 
 func Calendar(cfg *config.Config) http.HandlerFunc {
-	client := jarvis.NewClient(cfg)
+	client := duq.NewClient(cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		var webhook CalendarWebhook

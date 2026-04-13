@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"jarvis-gateway/internal/config"
+	"duq-gateway/internal/config"
 )
 
 // TestBasicAuthSuccess tests successful basic auth

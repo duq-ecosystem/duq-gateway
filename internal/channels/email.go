@@ -63,7 +63,7 @@ func (c *EmailChannel) Send(ctx *ResponseContext) error {
 		return fmt.Errorf("no email configured and no fallback available")
 	}
 
-	err := c.sender.Send(ctx.UserEmail, "Jarvis Report", ctx.Response)
+	err := c.sender.Send(ctx.UserEmail, "Duq Report", ctx.Response)
 	if err != nil {
 		// Fallback to telegram with error + response
 		if c.fallback != nil {

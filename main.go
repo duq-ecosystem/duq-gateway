@@ -14,16 +14,16 @@ import (
 
 	"github.com/caddyserver/certmagic"
 
-	"jarvis-gateway/internal/channels"
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/credentials"
-	"jarvis-gateway/internal/db"
-	"jarvis-gateway/internal/handlers"
-	"jarvis-gateway/internal/middleware"
-	"jarvis-gateway/internal/queue"
-	"jarvis-gateway/internal/rbac"
-	"jarvis-gateway/internal/registration"
-	"jarvis-gateway/internal/session"
+	"duq-gateway/internal/channels"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/credentials"
+	"duq-gateway/internal/db"
+	"duq-gateway/internal/handlers"
+	"duq-gateway/internal/middleware"
+	"duq-gateway/internal/queue"
+	"duq-gateway/internal/rbac"
+	"duq-gateway/internal/registration"
+	"duq-gateway/internal/session"
 )
 
 func main() {
@@ -81,7 +81,7 @@ func main() {
 	credService := credentials.NewService(dbClient.DB())
 
 	// Build channel router (SOLID: easily extensible with new channels)
-	// Note: TTS is done by Jarvis, channel only converts MP3→OGG
+	// Note: TTS is done by Duq, channel only converts MP3→OGG
 	channelRouter := channels.NewBuilder().
 		WithTelegram(cfg.Telegram.BotToken).
 		WithEmail().
@@ -155,7 +155,7 @@ func main() {
 	mux.HandleFunc("POST /api/telegram/webhook", middleware.RateLimitFunc(telegramLimiter, handlers.TelegramWithDeps(telegramDeps)))
 	mux.HandleFunc("POST /api/telegram/send", handlers.TelegramSend(cfg))
 
-	// Voice endpoint for mobile app (Keycloak SSO) - proxies to Jarvis /api/voice
+	// Voice endpoint for mobile app (Keycloak SSO) - proxies to Duq /api/voice
 	voiceDeps := &handlers.VoiceDeps{
 		Config:         cfg,
 		DBClient:       dbClient,
@@ -163,7 +163,7 @@ func main() {
 	}
 	mux.HandleFunc("POST /api/voice", middleware.KeycloakAuth(cfg, dbClient, handlers.Voice(voiceDeps)))
 
-	// Note: Conversation management moved to RBAC Proxy section (proxied to Jarvis)
+	// Note: Conversation management moved to RBAC Proxy section (proxied to Duq)
 
 	// Google OAuth endpoints
 	mux.HandleFunc("GET /api/auth/google/callback", handlers.GoogleOAuthCallback(oauthDeps))
@@ -193,10 +193,10 @@ func main() {
 	mux.HandleFunc("PUT /api/users/{id}", middleware.KeycloakAuth(cfg, dbClient, handlers.UpdateUser(dbClient)))
 	mux.HandleFunc("DELETE /api/users/{id}", middleware.KeycloakAuth(cfg, dbClient, handlers.DeleteUser(dbClient)))
 
-	// RBAC Proxy endpoints to Jarvis backend (Keycloak SSO)
+	// RBAC Proxy endpoints to Duq backend (Keycloak SSO)
 	proxyDeps := &handlers.ProxyDeps{Config: cfg, DBClient: dbClient}
 
-	// Conversations — proxied to Jarvis (owns conversation storage)
+	// Conversations — proxied to Duq (owns conversation storage)
 	mux.HandleFunc("GET /api/conversations", middleware.KeycloakAuth(cfg, dbClient, handlers.ProxyConversationsList(proxyDeps)))
 	mux.HandleFunc("POST /api/conversations", middleware.KeycloakAuth(cfg, dbClient, handlers.ProxyConversationsCreate(proxyDeps)))
 	mux.HandleFunc("GET /api/conversations/{id}/messages", middleware.KeycloakAuth(cfg, dbClient, handlers.ProxyConversationsMessages(proxyDeps)))
@@ -234,8 +234,8 @@ func main() {
 	mux.HandleFunc("GET /api/monitoring/stats/summary", middleware.KeycloakAuth(cfg, dbClient, handlers.ProxyMonitoringStats(proxyDeps)))
 	mux.HandleFunc("GET /api/monitoring/events", middleware.KeycloakAuth(cfg, dbClient, handlers.ProxyMonitoringEvents(proxyDeps)))
 
-	// Phase 3: Jarvis callback endpoint (receives async task results)
-	mux.HandleFunc("POST /api/jarvis/callback", handlers.JarvisCallback(callbackDeps))
+	// Phase 3: Duq callback endpoint (receives async task results)
+	mux.HandleFunc("POST /api/duq/callback", handlers.DuqCallback(callbackDeps))
 
 	// Admin Panel Reverse Proxy (Python FastAPI on port 8080)
 	adminURL, _ := url.Parse("http://127.0.0.1:8080")
@@ -398,7 +398,7 @@ func main() {
 		cancel()
 	}()
 
-	// Start internal HTTP server on :8082 for localhost communication (Jarvis→Gateway)
+	// Start internal HTTP server on :8082 for localhost communication (Duq→Gateway)
 	// This runs alongside the main TLS server and is NOT exposed externally
 	go func() {
 		internalServer := &http.Server{
@@ -424,12 +424,12 @@ func main() {
 		if cfg.TLS.DataDir != "" {
 			certmagic.Default.Storage = &certmagic.FileStorage{Path: cfg.TLS.DataDir}
 		} else {
-			certmagic.Default.Storage = &certmagic.FileStorage{Path: "/var/lib/jarvis-gateway/certs"}
+			certmagic.Default.Storage = &certmagic.FileStorage{Path: "/var/lib/duq-gateway/certs"}
 		}
 
 		// Start HTTPS server with certmagic
 		// certmagic.HTTPS() handles both :443 and :80 (for ACME challenges + HTTP→HTTPS redirect)
-		log.Printf("Jarvis Gateway starting HTTPS on :443 (domain: %s)", cfg.TLS.Domain)
+		log.Printf("Duq Gateway starting HTTPS on :443 (domain: %s)", cfg.TLS.Domain)
 		if err := certmagic.HTTPS([]string{cfg.TLS.Domain}, handler); err != nil {
 			log.Fatalf("CertMagic HTTPS error: %v", err)
 		}
@@ -458,7 +458,7 @@ func main() {
 			}
 		}()
 
-		log.Println("Jarvis Gateway starting HTTPS on :443")
+		log.Println("Duq Gateway starting HTTPS on :443")
 		if err := server.ListenAndServeTLS(cfg.TLS.CertFile, cfg.TLS.KeyFile); err != http.ErrServerClosed {
 			log.Fatalf("Server error: %v", err)
 		}
@@ -470,7 +470,7 @@ func main() {
 			Handler: handler,
 		}
 
-		log.Printf("Jarvis Gateway starting HTTP on :%s", cfg.Port)
+		log.Printf("Duq Gateway starting HTTP on :%s", cfg.Port)
 		if err := server.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatalf("Server error: %v", err)
 		}

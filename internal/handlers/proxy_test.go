@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"jarvis-gateway/internal/config"
+	"duq-gateway/internal/config"
 )
 
-// TestJarvisProxyClientTimeout verifies the proxy client has correct timeout
-func TestJarvisProxyClientTimeout(t *testing.T) {
+// TestDuqProxyClientTimeout verifies the proxy client has correct timeout
+func TestDuqProxyClientTimeout(t *testing.T) {
 	// Initialize the proxy client with default config
 	cfg := &config.Config{
 		Timeouts: config.TimeoutsConfig{
@@ -22,11 +22,11 @@ func TestJarvisProxyClientTimeout(t *testing.T) {
 	}
 	InitProxyClient(cfg)
 
-	if jarvisProxyClient == nil {
+	if duqProxyClient == nil {
 		t.Fatal("Expected proxy client to be initialized")
 	}
-	if jarvisProxyClient.Timeout != 60*time.Second {
-		t.Errorf("Expected timeout 60s, got %v", jarvisProxyClient.Timeout)
+	if duqProxyClient.Timeout != 60*time.Second {
+		t.Errorf("Expected timeout 60s, got %v", duqProxyClient.Timeout)
 	}
 }
 
@@ -40,11 +40,11 @@ func TestInitProxyClient(t *testing.T) {
 
 	InitProxyClient(cfg)
 
-	if jarvisProxyClient == nil {
+	if duqProxyClient == nil {
 		t.Fatal("Expected proxy client to be initialized")
 	}
-	if jarvisProxyClient.Timeout != 30*time.Second {
-		t.Errorf("Expected timeout 30s, got %v", jarvisProxyClient.Timeout)
+	if duqProxyClient.Timeout != 30*time.Second {
+		t.Errorf("Expected timeout 30s, got %v", duqProxyClient.Timeout)
 	}
 }
 
@@ -58,14 +58,14 @@ func TestInitProxyClientZeroTimeout(t *testing.T) {
 
 	InitProxyClient(cfg)
 
-	if jarvisProxyClient == nil {
+	if duqProxyClient == nil {
 		t.Fatal("Expected proxy client to be initialized")
 	}
 
 	// Should use fallback of 60 seconds
 	expectedTimeout := 60 * time.Second
-	if jarvisProxyClient.Timeout != expectedTimeout {
-		t.Errorf("Expected fallback timeout 60s, got %v", jarvisProxyClient.Timeout)
+	if duqProxyClient.Timeout != expectedTimeout {
+		t.Errorf("Expected fallback timeout 60s, got %v", duqProxyClient.Timeout)
 	}
 }
 
@@ -122,8 +122,8 @@ func TestIsAdmin(t *testing.T) {
 
 // TestProxyWorkflowsList tests the workflows list proxy with RBAC
 func TestProxyWorkflowsList(t *testing.T) {
-	// Create a mock Jarvis backend
-	mockJarvis := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// Create a mock Duq backend
+	mockDuq := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Verify user_id is set
 		userID := r.URL.Query().Get("user_id")
 		if userID == "" {
@@ -134,11 +134,11 @@ func TestProxyWorkflowsList(t *testing.T) {
 			"workflows": []string{},
 		})
 	}))
-	defer mockJarvis.Close()
+	defer mockDuq.Close()
 
 	deps := &ProxyDeps{
 		Config: &config.Config{
-			JarvisURL: mockJarvis.URL,
+			DuqURL: mockDuq.URL,
 		},
 	}
 
@@ -162,7 +162,7 @@ func TestProxyWorkflowsList(t *testing.T) {
 func TestProxyWorkflowsListUnauthorized(t *testing.T) {
 	deps := &ProxyDeps{
 		Config: &config.Config{
-			JarvisURL: "http://localhost:8081",
+			DuqURL: "http://localhost:8081",
 		},
 	}
 
@@ -180,7 +180,7 @@ func TestProxyWorkflowsListUnauthorized(t *testing.T) {
 
 // TestProxyWorkflowCreate tests workflow creation with RBAC
 func TestProxyWorkflowCreate(t *testing.T) {
-	mockJarvis := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mockDuq := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			t.Errorf("Expected POST, got %s", r.Method)
 		}
@@ -192,11 +192,11 @@ func TestProxyWorkflowCreate(t *testing.T) {
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(map[string]interface{}{"id": "workflow-1"})
 	}))
-	defer mockJarvis.Close()
+	defer mockDuq.Close()
 
 	deps := &ProxyDeps{
 		Config: &config.Config{
-			JarvisURL: mockJarvis.URL,
+			DuqURL: mockDuq.URL,
 		},
 	}
 
@@ -218,7 +218,7 @@ func TestProxyWorkflowCreate(t *testing.T) {
 
 // TestProxyCortexStore tests cortex store with user_id injection
 func TestProxyCortexStore(t *testing.T) {
-	mockJarvis := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mockDuq := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var payload map[string]interface{}
 		json.NewDecoder(r.Body).Decode(&payload)
 
@@ -230,11 +230,11 @@ func TestProxyCortexStore(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 	}))
-	defer mockJarvis.Close()
+	defer mockDuq.Close()
 
 	deps := &ProxyDeps{
 		Config: &config.Config{
-			JarvisURL: mockJarvis.URL,
+			DuqURL: mockDuq.URL,
 		},
 	}
 

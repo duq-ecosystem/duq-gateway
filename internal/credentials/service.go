@@ -145,7 +145,7 @@ func (c *UserCredentials) IsExpired() bool {
 	return time.Now().Add(5 * time.Minute).After(c.ExpiresAt)
 }
 
-// ToMap converts credentials to a map for sending to Jarvis
+// ToMap converts credentials to a map for sending to Duq
 func (c *UserCredentials) ToMap() map[string]interface{} {
 	return map[string]interface{}{
 		"access_token":  c.AccessToken,

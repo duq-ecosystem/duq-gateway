@@ -9,8 +9,8 @@ import (
 	"os/exec"
 	"time"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/db"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/db"
 )
 
 // Service orchestrates the registration process
@@ -151,8 +151,8 @@ func generateVerificationToken() (string, error) {
 func (s *Service) sendVerificationEmail(email, token string) error {
 	verifyURL := fmt.Sprintf("https://%s/api/auth/verify-email?token=%s", s.cfg.TLS.Domain, token)
 
-	subject := "Jarvis - Email Verification"
-	body := fmt.Sprintf(`Welcome to Jarvis!
+	subject := "Duq - Email Verification"
+	body := fmt.Sprintf(`Welcome to Duq!
 
 Please verify your email address by clicking the link below:
 
@@ -163,7 +163,7 @@ This link will expire in 24 hours.
 If you didn't create an account, please ignore this email.
 
 Best regards,
-Jarvis AI Assistant`, verifyURL)
+Duq AI Assistant`, verifyURL)
 
 	// Use gws CLI to send email
 	cmd := exec.Command("gws", "gmail", "send",

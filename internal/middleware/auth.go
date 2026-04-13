@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/db"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/db"
 )
 
 // BasicAuth middleware for protecting web pages with login/password
@@ -22,7 +22,7 @@ func BasicAuth(cfg *config.Config, next http.HandlerFunc) http.HandlerFunc {
 
 		user, pass, ok := r.BasicAuth()
 		if !ok {
-			w.Header().Set("WWW-Authenticate", `Basic realm="Jarvis Gateway"`)
+			w.Header().Set("WWW-Authenticate", `Basic realm="Duq Gateway"`)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
@@ -31,7 +31,7 @@ func BasicAuth(cfg *config.Config, next http.HandlerFunc) http.HandlerFunc {
 		passMatch := subtle.ConstantTimeCompare([]byte(pass), []byte(cfg.BasicAuth.Password)) == 1
 
 		if !userMatch || !passMatch {
-			w.Header().Set("WWW-Authenticate", `Basic realm="Jarvis Gateway"`)
+			w.Header().Set("WWW-Authenticate", `Basic realm="Duq Gateway"`)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}

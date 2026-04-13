@@ -10,10 +10,10 @@ import (
 	"net/http"
 	"time"
 
-	"jarvis-gateway/internal/config"
+	"duq-gateway/internal/config"
 )
 
-// transcribeVoice downloads a voice file from Telegram and sends to Jarvis for STT
+// transcribeVoice downloads a voice file from Telegram and sends to Duq for STT
 func transcribeVoice(cfg *config.Config, fileID string) (string, error) {
 	botToken := cfg.Telegram.BotToken
 	if botToken == "" {
@@ -53,10 +53,10 @@ func transcribeVoice(cfg *config.Config, fileID string) (string, error) {
 
 	log.Printf("[telegram] Downloaded audio: %d bytes", len(audioBytes))
 
-	// Send to Jarvis /api/voice/transcribe for STT
-	jarvisURL := cfg.JarvisURL
-	if jarvisURL == "" {
-		jarvisURL = "http://localhost:8081"
+	// Send to Duq /api/voice/transcribe for STT
+	duqURL := cfg.DuqURL
+	if duqURL == "" {
+		duqURL = "http://localhost:8081"
 	}
 
 	// Build multipart form
@@ -72,8 +72,8 @@ func transcribeVoice(cfg *config.Config, fileID string) (string, error) {
 	}
 	writer.Close()
 
-	// Send request to Jarvis
-	url := jarvisURL + "/api/voice/transcribe"
+	// Send request to Duq
+	url := duqURL + "/api/voice/transcribe"
 	log.Printf("[telegram] POST %s (audio=%d bytes)", url, len(audioBytes))
 
 	client := &http.Client{Timeout: 120 * time.Second}
@@ -89,18 +89,18 @@ func transcribeVoice(cfg *config.Config, fileID string) (string, error) {
 	}
 
 	if transcribeResp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("jarvis transcribe returned %d: %s", transcribeResp.StatusCode, string(body))
+		return "", fmt.Errorf("duq transcribe returned %d: %s", transcribeResp.StatusCode, string(body))
 	}
 
-	var jarvisResp JarvisTranscribeResponse
-	if err := json.Unmarshal(body, &jarvisResp); err != nil {
+	var duqResp DuqTranscribeResponse
+	if err := json.Unmarshal(body, &duqResp); err != nil {
 		return "", fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	if jarvisResp.Transcription == "" {
+	if duqResp.Transcription == "" {
 		return "", fmt.Errorf("STT returned empty result")
 	}
 
-	log.Printf("[telegram] Jarvis STT result: %s", truncateStr(jarvisResp.Transcription, 100))
-	return jarvisResp.Transcription, nil
+	log.Printf("[telegram] Duq STT result: %s", truncateStr(duqResp.Transcription, 100))
+	return duqResp.Transcription, nil
 }

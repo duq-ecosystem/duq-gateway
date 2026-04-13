@@ -11,7 +11,7 @@ func TestMessageStruct(t *testing.T) {
 	msg := Message{
 		ID:        1,
 		Role:      "user",
-		Content:   "Hello, Jarvis",
+		Content:   "Hello, Duq",
 		CreatedAt: time.Date(2026, 4, 12, 10, 0, 0, 0, time.UTC),
 	}
 

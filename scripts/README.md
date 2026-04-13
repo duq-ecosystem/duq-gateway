@@ -1,6 +1,6 @@
 # Google Apps Script - Calendar Reminder
 
-Скрипт для отправки напоминаний о событиях Google Calendar в Jarvis.
+Скрипт для отправки напоминаний о событиях Google Calendar в Duq.
 
 ## Как работает
 
@@ -11,7 +11,7 @@ Google Apps Script
       ↓ (за 15 мин до события)
 POST /api/calendar
       ↓
-Jarvis Gateway
+Duq Gateway
       ↓
 Telegram
 ```
@@ -33,7 +33,7 @@ Telegram
 | Property | Value |
 |----------|-------|
 | `WEBHOOK_URL` | `https://on-za-menya.online/api/calendar` |
-| `WEBHOOK_TOKEN` | Токен из `/etc/jarvis-gateway/config.json` |
+| `WEBHOOK_TOKEN` | Токен из `/etc/duq-gateway/config.json` |
 | `REMINDER_MINUTES` | `15` (опционально) |
 | `CALENDAR_ID` | `primary` (опционально) |
 

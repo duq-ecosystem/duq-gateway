@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	DefaultPrefix = "jarvis"
+	DefaultPrefix = "duq"
 )
 
-// Task represents a task to be queued (matches Jarvis RedisTaskData format)
+// Task represents a task to be queued (matches Duq RedisTaskData format)
 type Task struct {
 	ID              string                 `json:"id"`
 	UserID          string                 `json:"user_id"`
@@ -65,7 +65,7 @@ func NewClient(redisURL string, redisTimeoutSec int) (*Client, error) {
 	return &Client{rdb: rdb, prefix: DefaultPrefix}, nil
 }
 
-// Push adds task to Redis queue (same format as Jarvis expects)
+// Push adds task to Redis queue (same format as Duq expects)
 func (c *Client) Push(ctx context.Context, task *Task) (string, error) {
 	if task.ID == "" {
 		task.ID = uuid.New().String()

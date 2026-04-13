@@ -12,10 +12,10 @@ type ResponseContext struct {
 	Response  string
 	IsVoice   bool
 
-	// Voice-aware fields (from Jarvis response)
+	// Voice-aware fields (from Duq response)
 	OutputType    string // "text", "voice", or "both"
 	VoicePriority string // "high", "normal", or "skip"
-	VoiceData     []byte // Audio bytes (MP3 from Jarvis)
+	VoiceData     []byte // Audio bytes (MP3 from Duq)
 	VoiceFormat   string // Audio format (default: "mp3")
 }
 

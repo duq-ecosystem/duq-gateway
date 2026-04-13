@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"golang.org/x/crypto/bcrypt"
-	"jarvis-gateway/internal/config"
-	"jarvis-gateway/internal/db"
+	"duq-gateway/internal/config"
+	"duq-gateway/internal/db"
 )
 
 // Strategy defines the interface for registration strategies

@@ -12,7 +12,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"jarvis-gateway/internal/config"
+	"duq-gateway/internal/config"
 )
 
 // SendTelegramMessage sends a text message to Telegram (exported for use by other handlers)
@@ -202,7 +202,7 @@ func sendTelegramVoiceWithCaption(cfg *config.Config, chatID int64, text string,
 
 // formatTelegramUserID formats telegram chat ID to user ID string
 func formatTelegramUserID(chatID int64) string {
-	// Just the numeric ID to match jarvis's format
+	// Just the numeric ID to match duq's format
 	return fmt.Sprintf("%d", chatID)
 }
 

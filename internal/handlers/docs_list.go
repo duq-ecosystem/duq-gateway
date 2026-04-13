@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"jarvis-gateway/internal/config"
+	"duq-gateway/internal/config"
 )
 
 // DocFile represents a single documentation file
@@ -29,8 +29,8 @@ func DocsList(cfg *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("[docs-list] Scanning documentation directory")
 
-		// Docs are in /opt/obsidian-vault/Coding/jarvis/
-		docsPath := "/opt/obsidian-vault/Coding/jarvis"
+		// Docs are in /opt/obsidian-vault/Coding/duq/
+		docsPath := "/opt/obsidian-vault/Coding/duq"
 
 		// Check if directory exists
 		if _, err := os.Stat(docsPath); os.IsNotExist(err) {
@@ -177,8 +177,8 @@ func categorizeDoc(basename string) string {
 // generateTitle converts filename to display title
 func generateTitle(basename string) string {
 	// Remove common prefixes
-	title := strings.TrimPrefix(basename, "jarvis-")
-	title = strings.TrimPrefix(title, "not-that-jarvis-")
+	title := strings.TrimPrefix(basename, "duq-")
+	title = strings.TrimPrefix(title, "not-that-duq-")
 
 	// Replace dashes/underscores with spaces
 	title = strings.ReplaceAll(title, "-", " ")
