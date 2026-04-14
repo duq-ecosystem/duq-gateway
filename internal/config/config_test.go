@@ -9,7 +9,7 @@ import (
 func TestLoadDefaults(t *testing.T) {
 	// Clear env vars that might interfere
 	envsToClear := []string{
-		"JARVIS_PORT", "JARVIS_TELEGRAM_CHAT_ID", "JARVIS_URL",
+		"DUQ_PORT", "DUQ_TELEGRAM_CHAT_ID", "DUQ_URL",
 		"GATEWAY_HOST", "USE_ASYNC_QUEUE",
 	}
 	for _, env := range envsToClear {
@@ -99,11 +99,11 @@ func TestLoadTracingDefaults(t *testing.T) {
 // TestLoadEnvOverride tests environment variable overrides
 func TestLoadEnvOverride(t *testing.T) {
 	// Set env vars
-	os.Setenv("JARVIS_PORT", "9999")
-	os.Setenv("JARVIS_URL", "http://custom:1234")
+	os.Setenv("DUQ_PORT", "9999")
+	os.Setenv("DUQ_URL", "http://custom:1234")
 	defer func() {
-		os.Unsetenv("JARVIS_PORT")
-		os.Unsetenv("JARVIS_URL")
+		os.Unsetenv("DUQ_PORT")
+		os.Unsetenv("DUQ_URL")
 	}()
 
 	cfg, err := Load()
@@ -121,17 +121,17 @@ func TestLoadEnvOverride(t *testing.T) {
 
 // TestLoadDatabaseEnvOverride tests database environment overrides
 func TestLoadDatabaseEnvOverride(t *testing.T) {
-	os.Setenv("JARVIS_DB_HOST", "db.example.com")
-	os.Setenv("JARVIS_DB_PORT", "5432")
-	os.Setenv("JARVIS_DB_USER", "testuser")
-	os.Setenv("JARVIS_DB_PASSWORD", "secret")
-	os.Setenv("JARVIS_DB_NAME", "testdb")
+	os.Setenv("DUQ_DB_HOST", "db.example.com")
+	os.Setenv("DUQ_DB_PORT", "5432")
+	os.Setenv("DUQ_DB_USER", "testuser")
+	os.Setenv("DUQ_DB_PASSWORD", "secret")
+	os.Setenv("DUQ_DB_NAME", "testdb")
 	defer func() {
-		os.Unsetenv("JARVIS_DB_HOST")
-		os.Unsetenv("JARVIS_DB_PORT")
-		os.Unsetenv("JARVIS_DB_USER")
-		os.Unsetenv("JARVIS_DB_PASSWORD")
-		os.Unsetenv("JARVIS_DB_NAME")
+		os.Unsetenv("DUQ_DB_HOST")
+		os.Unsetenv("DUQ_DB_PORT")
+		os.Unsetenv("DUQ_DB_USER")
+		os.Unsetenv("DUQ_DB_PASSWORD")
+		os.Unsetenv("DUQ_DB_NAME")
 	}()
 
 	cfg, err := Load()

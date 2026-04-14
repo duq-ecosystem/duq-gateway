@@ -180,13 +180,13 @@ func Load() (*Config, error) {
 	}
 
 	// Override from environment
-	if port := os.Getenv("JARVIS_PORT"); port != "" {
+	if port := os.Getenv("DUQ_PORT"); port != "" {
 		cfg.Port = port
 	}
-	if chatID := os.Getenv("JARVIS_TELEGRAM_CHAT_ID"); chatID != "" {
+	if chatID := os.Getenv("DUQ_TELEGRAM_CHAT_ID"); chatID != "" {
 		cfg.TelegramChatID = chatID
 	}
-	if url := os.Getenv("JARVIS_URL"); url != "" {
+	if url := os.Getenv("DUQ_URL"); url != "" {
 		cfg.DuqURL = url
 	}
 
@@ -199,29 +199,29 @@ func Load() (*Config, error) {
 	}
 
 	// Database env overrides
-	if host := os.Getenv("JARVIS_DB_HOST"); host != "" {
+	if host := os.Getenv("DUQ_DB_HOST"); host != "" {
 		cfg.Database.Host = host
 	}
-	if port := os.Getenv("JARVIS_DB_PORT"); port != "" {
+	if port := os.Getenv("DUQ_DB_PORT"); port != "" {
 		if p, err := strconv.Atoi(port); err == nil {
 			cfg.Database.Port = p
 		}
 	}
-	if user := os.Getenv("JARVIS_DB_USER"); user != "" {
+	if user := os.Getenv("DUQ_DB_USER"); user != "" {
 		cfg.Database.User = user
 	}
-	if pass := os.Getenv("JARVIS_DB_PASSWORD"); pass != "" {
+	if pass := os.Getenv("DUQ_DB_PASSWORD"); pass != "" {
 		cfg.Database.Password = pass
 	}
-	if name := os.Getenv("JARVIS_DB_NAME"); name != "" {
+	if name := os.Getenv("DUQ_DB_NAME"); name != "" {
 		cfg.Database.Name = name
 	}
 
 	// Voice env overrides
-	if stt := os.Getenv("JARVIS_STT_COMMAND"); stt != "" {
+	if stt := os.Getenv("DUQ_STT_COMMAND"); stt != "" {
 		cfg.Voice.STTCommand = stt
 	}
-	if tts := os.Getenv("JARVIS_TTS_VOICE"); tts != "" {
+	if tts := os.Getenv("DUQ_TTS_VOICE"); tts != "" {
 		cfg.Voice.TTSVoice = tts
 	}
 

@@ -740,7 +740,7 @@ type PageData struct {
 func Docs(cfg *config.Config) http.HandlerFunc {
 	docsPath := cfg.DocsPath
 	if docsPath == "" {
-		docsPath = "/opt/obsidian-vault/Coding/vtoroy"
+		docsPath = "/opt/obsidian-vault/Coding/duq"
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
