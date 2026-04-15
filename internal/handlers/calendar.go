@@ -86,6 +86,8 @@ func Calendar(deps *CalendarDeps) http.HandlerFunc {
 
 func formatCalendarMessage(webhook CalendarWebhook) string {
 	event := webhook.Event
+	prefix := "[Календарь] "
+	suffix := "\n\nЭто автоматическое уведомление."
 
 	// Parse start time
 	startTime, err := time.Parse(time.RFC3339, event.StartTime)
@@ -96,23 +98,23 @@ func formatCalendarMessage(webhook CalendarWebhook) string {
 
 	switch webhook.Type {
 	case "reminder":
-		msg := fmt.Sprintf("Напоминание: %s в %s", event.Title, timeStr)
+		msg := fmt.Sprintf("%sНапоминание: %s в %s", prefix, event.Title, timeStr)
 		if event.MeetLink != "" {
 			msg += fmt.Sprintf("\nСсылка: %s", event.MeetLink)
 		}
 		if event.Location != "" {
 			msg += fmt.Sprintf("\nМесто: %s", event.Location)
 		}
-		return msg
+		return msg + suffix
 
 	case "created":
-		return fmt.Sprintf("Новое событие: %s в %s", event.Title, timeStr)
+		return fmt.Sprintf("%sНовое событие: %s в %s%s", prefix, event.Title, timeStr, suffix)
 
 	case "updated":
-		return fmt.Sprintf("Событие изменено: %s, новое время: %s", event.Title, timeStr)
+		return fmt.Sprintf("%sСобытие изменено: %s, новое время: %s%s", prefix, event.Title, timeStr, suffix)
 
 	case "cancelled":
-		return fmt.Sprintf("Событие отменено: %s", event.Title)
+		return fmt.Sprintf("%sСобытие отменено: %s%s", prefix, event.Title, suffix)
 
 	default:
 		return ""

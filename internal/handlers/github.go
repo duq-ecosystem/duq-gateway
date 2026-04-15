@@ -127,6 +127,9 @@ func GitHub(deps *GitHubDeps) http.HandlerFunc {
 }
 
 func formatGitHubMessage(eventType string, webhook GitHubWebhook) string {
+	prefix := "[GitHub уведомление] "
+	suffix := "\n\nЭто автоматическое уведомление, ответ не требуется."
+
 	switch eventType {
 	case "pull_request":
 		if webhook.PullRequest == nil {
@@ -135,10 +138,14 @@ func formatGitHubMessage(eventType string, webhook GitHubWebhook) string {
 		pr := webhook.PullRequest
 		switch webhook.Action {
 		case "opened":
-			return fmt.Sprintf("Новый PR в %s\n#%d: %s\nОт: %s\n%s",
-				webhook.Repository.Name, pr.Number, pr.Title, pr.User.Login, pr.URL)
+			return fmt.Sprintf("%sНовый Pull Request в репозитории %s\n#%d: %s\nАвтор: %s\nСсылка: %s%s",
+				prefix, webhook.Repository.Name, pr.Number, pr.Title, pr.User.Login, pr.URL, suffix)
 		case "closed":
-			return fmt.Sprintf("PR закрыт в %s\n#%d: %s", webhook.Repository.Name, pr.Number, pr.Title)
+			return fmt.Sprintf("%sPull Request закрыт в репозитории %s\n#%d: %s%s",
+				prefix, webhook.Repository.Name, pr.Number, pr.Title, suffix)
+		case "merged":
+			return fmt.Sprintf("%sPull Request смержен в репозитории %s\n#%d: %s%s",
+				prefix, webhook.Repository.Name, pr.Number, pr.Title, suffix)
 		}
 
 	case "issues":
@@ -148,12 +155,16 @@ func formatGitHubMessage(eventType string, webhook GitHubWebhook) string {
 		issue := webhook.Issue
 		switch webhook.Action {
 		case "opened":
-			return fmt.Sprintf("Новый issue в %s\n#%d: %s\nОт: %s\n%s",
-				webhook.Repository.Name, issue.Number, issue.Title, issue.User.Login, issue.URL)
+			return fmt.Sprintf("%sНовый Issue в репозитории %s\n#%d: %s\nАвтор: %s\nСсылка: %s%s",
+				prefix, webhook.Repository.Name, issue.Number, issue.Title, issue.User.Login, issue.URL, suffix)
+		case "closed":
+			return fmt.Sprintf("%sIssue закрыт в репозитории %s\n#%d: %s%s",
+				prefix, webhook.Repository.Name, issue.Number, issue.Title, suffix)
 		}
 
 	case "push":
-		return fmt.Sprintf("Push в %s от %s", webhook.Repository.Name, webhook.Sender.Login)
+		return fmt.Sprintf("%sНовый push в репозиторий %s от %s%s",
+			prefix, webhook.Repository.Name, webhook.Sender.Login, suffix)
 	}
 
 	return ""

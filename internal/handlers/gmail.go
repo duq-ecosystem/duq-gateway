@@ -78,13 +78,16 @@ func Gmail(deps *GmailDeps) http.HandlerFunc {
 }
 
 func formatGmailMessage(webhook GmailWebhook) string {
+	prefix := "[Gmail уведомление] "
+	suffix := "\n\nЭто автоматическое уведомление."
+
 	switch webhook.Type {
 	case "new_email", "important":
-		msg := fmt.Sprintf("Новое письмо от %s\nТема: %s", webhook.From, webhook.Subject)
+		msg := fmt.Sprintf("%sНовое письмо от %s\nТема: %s", prefix, webhook.From, webhook.Subject)
 		if webhook.Snippet != "" {
 			msg += fmt.Sprintf("\n\n%s...", webhook.Snippet)
 		}
-		return msg
+		return msg + suffix
 	default:
 		return ""
 	}
