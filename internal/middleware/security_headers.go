@@ -32,7 +32,7 @@ func DefaultSecurityHeadersConfig() SecurityHeadersConfig {
 		HSTSIncludeSubdomains: true,
 		FrameOptions:          "DENY",
 		CSPEnabled:            true,
-		CSPDirective:          "default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://d3js.org; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+		CSPDirective:          "default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
 		ContentTypeNosniff:    true,
 		XSSProtection:         true,
 		ReferrerPolicy:        "strict-origin-when-cross-origin",
