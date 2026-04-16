@@ -261,12 +261,12 @@ func main() {
 		adminProxy.ServeHTTP(w, r)
 	}
 
-	// Register admin routes - protected with BasicAuth (same as /docs)
+	// Register admin routes - duq-admin handles auth via Keycloak cookies
 	// SSE endpoints use custom proxy for streaming
-	mux.HandleFunc("GET /admin/traces/stream", middleware.BasicAuth(cfg, sseProxyHandler))
-	mux.HandleFunc("GET /admin/api/system/logs/stream", middleware.BasicAuth(cfg, sseProxyHandler))
-	mux.HandleFunc("GET /admin/", middleware.BasicAuth(cfg, adminHandler))
-	mux.HandleFunc("POST /admin/", middleware.BasicAuth(cfg, adminHandler))
+	mux.HandleFunc("GET /admin/traces/stream", sseProxyHandler)
+	mux.HandleFunc("GET /admin/api/system/logs/stream", sseProxyHandler)
+	mux.HandleFunc("GET /admin/", adminHandler)
+	mux.HandleFunc("POST /admin/", adminHandler)
 
 	// Keycloak Reverse Proxy (for mobile app HTTPS OAuth)
 	// Uses cfg.KeycloakInternalURL for internal proxy target
@@ -293,35 +293,14 @@ func main() {
 	mux.HandleFunc("POST /realms/", keycloakHandler)
 	log.Printf("[keycloak] Reverse proxy enabled: /realms/* -> %s", keycloakProxyURL)
 
-	// Serve static files for frontend (React SPA) with proper cache headers
-	fs := http.FileServer(http.Dir("./static"))
-	mux.Handle("GET /", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Set cache headers based on file type
-		path := r.URL.Path
-		if path == "/" || path == "/index.html" || (!strings.HasPrefix(path, "/assets/") && strings.HasSuffix(path, ".html")) {
-			// HTML files: no-cache (always revalidate)
-			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-			w.Header().Set("Pragma", "no-cache")
-			w.Header().Set("Expires", "0")
-		} else if strings.HasPrefix(path, "/assets/") {
-			// Assets with hashes: cache forever (immutable)
-			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	// Root redirect to admin panel
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			http.Redirect(w, r, "/admin/", http.StatusFound)
+			return
 		}
-
-		// Serve index.html for all non-API, non-health routes (SPA routing)
-		if path != "/" && path != "/index.html" {
-			// Check if file exists
-			if _, err := os.Stat("./static" + path); os.IsNotExist(err) {
-				// File doesn't exist, serve index.html for client-side routing
-				w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-				w.Header().Set("Pragma", "no-cache")
-				w.Header().Set("Expires", "0")
-				http.ServeFile(w, r, "./static/index.html")
-				return
-			}
-		}
-		fs.ServeHTTP(w, r)
-	}))
+		http.NotFound(w, r)
+	})
 
 	// Security headers middleware (HSTS, X-Frame-Options, CSP, etc.)
 	securityConfig := middleware.DefaultSecurityHeadersConfig()
@@ -333,6 +312,8 @@ func main() {
 	// CSRF protection (disabled for webhooks and Bearer token APIs)
 	csrfConfig := middleware.DefaultCSRFConfig()
 	csrfConfig.CookieSecure = cfg.TLS.Enabled // Secure cookies only with HTTPS
+	// Exclude admin login from CSRF (unauthenticated, Keycloak handles security)
+	csrfConfig.ExcludePaths = append(csrfConfig.ExcludePaths, "/admin/login", "/admin/logout")
 	csrfStore := middleware.NewCSRFStore(24 * time.Hour)
 
 	// Apply middlewares in order: Security Headers → CSRF → Logger
