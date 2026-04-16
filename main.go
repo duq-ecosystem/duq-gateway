@@ -268,6 +268,15 @@ func main() {
 	mux.HandleFunc("GET /admin/", adminHandler)
 	mux.HandleFunc("POST /admin/", adminHandler)
 
+	// Duq Backend Reverse Proxy for monitoring API (direct access, not through Redis queue)
+	duqBackendURL, _ := url.Parse("http://127.0.0.1:8081")
+	duqBackendProxy := httputil.NewSingleHostReverseProxy(duqBackendURL)
+	monitoringHandler := func(w http.ResponseWriter, r *http.Request) {
+		r.Host = duqBackendURL.Host
+		duqBackendProxy.ServeHTTP(w, r)
+	}
+	mux.HandleFunc("GET /api/monitoring/", monitoringHandler)
+
 	// Keycloak Reverse Proxy (for mobile app HTTPS OAuth)
 	// Uses cfg.KeycloakInternalURL for internal proxy target
 	keycloakProxyURL := cfg.KeycloakInternalURL
