@@ -196,8 +196,8 @@ func main() {
 	// Phase 3: Duq callback endpoint (receives async task results from worker)
 	mux.HandleFunc("POST /api/duq/callback", handlers.DuqCallback(callbackDeps))
 
-	// Admin Panel Reverse Proxy (Python FastAPI on port 8080)
-	adminURL, _ := url.Parse("http://127.0.0.1:8080")
+	// Admin Panel Reverse Proxy (configurable via ADMIN_URL env)
+	adminURL, _ := url.Parse(cfg.AdminURL)
 	adminProxy := httputil.NewSingleHostReverseProxy(adminURL)
 	adminProxy.FlushInterval = -1 // Enable streaming for SSE
 
@@ -276,7 +276,7 @@ func main() {
 	mux.HandleFunc("POST /admin/", adminHandler)
 
 	// Duq Backend Reverse Proxy for monitoring API (direct access, not through Redis queue)
-	duqBackendURL, _ := url.Parse("http://127.0.0.1:8081")
+	duqBackendURL, _ := url.Parse(cfg.DuqURL)
 	duqBackendProxy := httputil.NewSingleHostReverseProxy(duqBackendURL)
 	monitoringHandler := func(w http.ResponseWriter, r *http.Request) {
 		r.Host = duqBackendURL.Host

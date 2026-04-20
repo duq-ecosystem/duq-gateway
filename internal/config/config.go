@@ -102,6 +102,7 @@ type Config struct {
 	GatewayHost        string            `json:"gateway_host"`         // Phase 3: Self address for callbacks
 	UseAsyncQueue      bool              `json:"use_async_queue"`      // Phase 3: Use async queue instead of sync chat
 	KeycloakInternalURL string           `json:"keycloak_internal_url"` // Internal Keycloak URL for proxy (default: http://localhost:8180)
+	AdminURL           string            `json:"admin_url"`            // Admin panel URL for proxy (default: http://localhost:8080)
 	DocsPath           string            `json:"docs_path"`
 	GitHubSecret       string            `json:"github_secret"`
 	JWTSecret          string            `json:"jwt_secret"` // JWT secret for authentication
@@ -196,6 +197,12 @@ func Load() (*Config, error) {
 	}
 	if async := os.Getenv("USE_ASYNC_QUEUE"); async != "" {
 		cfg.UseAsyncQueue = async == "true" || async == "1"
+	}
+	// Admin panel URL for proxy (default: http://localhost:8080)
+	if adminURL := os.Getenv("ADMIN_URL"); adminURL != "" {
+		cfg.AdminURL = adminURL
+	} else if cfg.AdminURL == "" {
+		cfg.AdminURL = "http://localhost:8080"
 	}
 
 	// Database env overrides
