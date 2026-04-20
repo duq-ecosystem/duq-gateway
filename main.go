@@ -347,14 +347,14 @@ func main() {
 		cancel()
 	}()
 
-	// Start internal HTTP server on :8082 for localhost communication (Duq→Gateway)
-	// This runs alongside the main TLS server and is NOT exposed externally
+	// Start internal HTTP server on :8082 for container-to-container communication (Duq→Gateway)
+	// In Docker, this is accessible via the duq-network; external access controlled by port mapping
 	go func() {
 		internalServer := &http.Server{
-			Addr:    "127.0.0.1:8082",
+			Addr:    "0.0.0.0:" + cfg.Port,
 			Handler: handler,
 		}
-		log.Println("Internal HTTP server starting on 127.0.0.1:8082 (localhost only)")
+		log.Printf("Internal HTTP server starting on 0.0.0.0:%s", cfg.Port)
 		if err := internalServer.ListenAndServe(); err != http.ErrServerClosed {
 			log.Printf("Internal HTTP server error: %v", err)
 		}
