@@ -201,6 +201,17 @@ func main() {
 	adminProxy := httputil.NewSingleHostReverseProxy(adminURL)
 	adminProxy.FlushInterval = -1 // Enable streaming for SSE
 
+	// Rewrite Location headers: /login -> /admin/login
+	adminProxy.ModifyResponse = func(resp *http.Response) error {
+		if location := resp.Header.Get("Location"); location != "" {
+			// If backend returns relative redirect, prepend /admin
+			if strings.HasPrefix(location, "/") && !strings.HasPrefix(location, "/admin") {
+				resp.Header.Set("Location", "/admin"+location)
+			}
+		}
+		return nil
+	}
+
 	// Custom SSE proxy handler - manually copies response with explicit flushing
 	sseProxyHandler := func(w http.ResponseWriter, r *http.Request) {
 		// Build target URL - strip /admin prefix
