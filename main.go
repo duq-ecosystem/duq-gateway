@@ -196,6 +196,18 @@ func main() {
 	// Phase 3: Duq callback endpoint (receives async task results from worker)
 	mux.HandleFunc("POST /api/duq/callback", handlers.DuqCallback(callbackDeps))
 
+	// Unified Message API for all clients (mobile, web, API)
+	// Protected by Keycloak JWT authentication
+	apiDeps := &handlers.APIDeps{
+		Config:      cfg,
+		DBClient:    dbClient,
+		QueueClient: queueClient,
+		CredService: credService,
+		RBACService: rbacService,
+	}
+	mux.HandleFunc("POST /api/message", middleware.KeycloakAuth(cfg, dbClient, handlers.UnifiedAPI(apiDeps)))
+	mux.HandleFunc("GET /api/task/{id}", middleware.KeycloakAuth(cfg, dbClient, handlers.GetTaskStatus(apiDeps)))
+
 	// Admin Panel Reverse Proxy (configurable via ADMIN_URL env)
 	adminURL, _ := url.Parse(cfg.AdminURL)
 	adminProxy := httputil.NewSingleHostReverseProxy(adminURL)

@@ -14,11 +14,13 @@ import (
 
 // MessageRequest - UNIFIED request format for ALL clients
 type MessageRequest struct {
-	UserID  string `json:"user_id"`
-	Message string `json:"message"`
-	IsVoice bool   `json:"is_voice,omitempty"`
-	ChatID  int64  `json:"chat_id,omitempty"`
-	Source  string `json:"source,omitempty"` // telegram, mobile, api
+	UserID      string `json:"user_id"`
+	Message     string `json:"message"`
+	IsVoice     bool   `json:"is_voice,omitempty"`
+	VoiceData   string `json:"voice_data,omitempty"`   // Base64 encoded audio
+	VoiceFormat string `json:"voice_format,omitempty"` // wav, ogg, mp3
+	ChatID      int64  `json:"chat_id,omitempty"`
+	Source      string `json:"source,omitempty"` // telegram, android, api
 }
 
 // APIResponse - unified response for message API
@@ -96,24 +98,35 @@ func ProcessMessage(ctx context.Context, deps *APIDeps, req *MessageRequest) (*A
 	// Callback URL
 	callbackURL := fmt.Sprintf("http://%s/api/duq/callback", deps.Config.GatewayHost)
 
+	// Build task payload
+	payload := map[string]interface{}{
+		"message":        req.Message,
+		"output_channel": "telegram",
+		"allowed_tools":  allowedTools,
+		"user_preferences": map[string]string{
+			"timezone":           prefs.Timezone,
+			"preferred_language": prefs.PreferredLanguage,
+		},
+		"gws_credentials": gwsCreds,
+	}
+
+	// Add voice data if present (for transcription by Duq)
+	if req.VoiceData != "" {
+		payload["voice_data"] = req.VoiceData
+		if req.VoiceFormat != "" {
+			payload["voice_format"] = req.VoiceFormat
+		} else {
+			payload["voice_format"] = "wav" // default
+		}
+	}
+
 	// Build task
-	// NOTE: ConversationID and history removed — Duq manages these
 	task := &queue.Task{
 		UserID:      req.UserID,
 		Type:        "message",
 		Priority:    50,
 		CallbackURL: callbackURL,
-		Payload: map[string]interface{}{
-			"message":        req.Message,
-			"output_channel": "telegram",
-			"allowed_tools":  allowedTools,
-			// NOTE: History removed — Duq loads from DB
-			"user_preferences": map[string]string{
-				"timezone":           prefs.Timezone,
-				"preferred_language": prefs.PreferredLanguage,
-			},
-			"gws_credentials": gwsCreds,
-		},
+		Payload:     payload,
 		RequestMetadata: map[string]interface{}{
 			"chat_id":    req.ChatID,
 			"user_email": userEmail,
@@ -162,4 +175,53 @@ func truncMsg(s string, n int) string {
 		return s
 	}
 	return s[:n] + "..."
+}
+
+// TaskStatusResponse - response for task status polling
+type TaskStatusResponse struct {
+	TaskID   string                 `json:"task_id"`
+	Status   string                 `json:"status"`
+	Response map[string]interface{} `json:"response,omitempty"`
+	Error    string                 `json:"error,omitempty"`
+}
+
+// GetTaskStatus - HTTP handler for GET /api/task/{id}
+// Used by mobile clients to poll for task results
+func GetTaskStatus(deps *APIDeps) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		taskID := r.PathValue("id")
+		if taskID == "" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(TaskStatusResponse{Error: "task_id required"})
+			return
+		}
+
+		ctx := r.Context()
+
+		// Check task status
+		status, err := deps.QueueClient.GetTaskStatus(ctx, taskID)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(TaskStatusResponse{TaskID: taskID, Error: "task not found"})
+			return
+		}
+
+		resp := TaskStatusResponse{
+			TaskID: taskID,
+			Status: status,
+		}
+
+		// If completed, try to get response
+		if status == "COMPLETED" || status == "SUCCESS" {
+			if response, err := deps.QueueClient.GetTaskResponse(ctx, taskID); err == nil && response != nil {
+				resp.Response = response
+			}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(resp)
+	}
 }

@@ -168,6 +168,37 @@ func (c *Client) WaitForResponse(ctx context.Context, taskID string, timeout tim
 	return payload, nil
 }
 
+// GetTaskStatus returns task status (non-blocking)
+func (c *Client) GetTaskStatus(ctx context.Context, taskID string) (string, error) {
+	taskKey := fmt.Sprintf("%s:task:%s", c.prefix, taskID)
+	status, err := c.rdb.HGet(ctx, taskKey, "status").Result()
+	if err == redis.Nil {
+		return "", fmt.Errorf("task not found")
+	}
+	return status, err
+}
+
+// GetTaskResponse returns response if available (non-blocking)
+// Returns nil, nil if response not ready yet
+func (c *Client) GetTaskResponse(ctx context.Context, taskID string) (map[string]interface{}, error) {
+	responseKey := fmt.Sprintf("%s:response:%s", c.prefix, taskID)
+
+	data, err := c.rdb.Get(ctx, responseKey).Result()
+	if err == redis.Nil {
+		return nil, nil // Not ready yet
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get response: %w", err)
+	}
+
+	var payload map[string]interface{}
+	if err := json.Unmarshal([]byte(data), &payload); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	return payload, nil
+}
+
 // Close closes Redis connection
 func (c *Client) Close() error {
 	return c.rdb.Close()
