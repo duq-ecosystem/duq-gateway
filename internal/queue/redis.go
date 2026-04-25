@@ -203,3 +203,68 @@ func (c *Client) GetTaskResponse(ctx context.Context, taskID string) (map[string
 func (c *Client) Close() error {
 	return c.rdb.Close()
 }
+
+// HistoryMessage represents a single message in conversation history
+type HistoryMessage struct {
+	Role      string `json:"role"`
+	Content   string `json:"content"`
+	Timestamp string `json:"timestamp"`
+}
+
+// GetHistorySessions returns all session IDs (dates) with history for a user
+func (c *Client) GetHistorySessions(ctx context.Context, userID string) ([]string, error) {
+	pattern := fmt.Sprintf("%s:history:%s:*", c.prefix, userID)
+	var sessions []string
+
+	iter := c.rdb.Scan(ctx, 0, pattern, 100).Iterator()
+	for iter.Next(ctx) {
+		key := iter.Val()
+		// Extract session_id from key: duq:history:{user_id}:{session_id}
+		parts := splitKey(key, ":")
+		if len(parts) >= 4 {
+			sessionID := parts[3]
+			sessions = append(sessions, sessionID)
+		}
+	}
+	if err := iter.Err(); err != nil {
+		return nil, fmt.Errorf("scan failed: %w", err)
+	}
+
+	return sessions, nil
+}
+
+// GetHistoryMessages returns all messages for a user/session
+func (c *Client) GetHistoryMessages(ctx context.Context, userID, sessionID string) ([]HistoryMessage, error) {
+	key := fmt.Sprintf("%s:history:%s:%s", c.prefix, userID, sessionID)
+
+	data, err := c.rdb.LRange(ctx, key, 0, -1).Result()
+	if err != nil {
+		return nil, fmt.Errorf("lrange failed: %w", err)
+	}
+
+	var messages []HistoryMessage
+	for _, item := range data {
+		var msg HistoryMessage
+		if err := json.Unmarshal([]byte(item), &msg); err != nil {
+			log.Printf("[queue] Failed to parse history message: %v", err)
+			continue
+		}
+		messages = append(messages, msg)
+	}
+
+	return messages, nil
+}
+
+// splitKey splits a Redis key by separator
+func splitKey(key, sep string) []string {
+	var parts []string
+	start := 0
+	for i := 0; i < len(key); i++ {
+		if key[i] == sep[0] {
+			parts = append(parts, key[start:i])
+			start = i + 1
+		}
+	}
+	parts = append(parts, key[start:])
+	return parts
+}

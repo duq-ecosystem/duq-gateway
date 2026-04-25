@@ -226,6 +226,18 @@ func main() {
 	mux.HandleFunc("POST /api/message", middleware.KeycloakAuth(cfg, dbClient, handlers.UnifiedAPI(apiDeps)))
 	mux.HandleFunc("GET /api/task/{id}", middleware.KeycloakAuth(cfg, dbClient, handlers.GetTaskStatus(apiDeps)))
 
+	// History API for conversation sync (mobile, web)
+	// Protected by Keycloak JWT authentication
+	historyDeps := &handlers.HistoryDeps{
+		Config:      cfg,
+		DBClient:    dbClient,
+		QueueClient: queueClient,
+	}
+	mux.HandleFunc("GET /api/conversations", middleware.KeycloakAuth(cfg, dbClient, handlers.GetConversations(historyDeps)))
+	mux.HandleFunc("GET /api/conversations/{session_id}/messages", middleware.KeycloakAuth(cfg, dbClient, handlers.GetMessages(historyDeps)))
+	mux.HandleFunc("POST /api/conversations", middleware.KeycloakAuth(cfg, dbClient, handlers.CreateConversation(historyDeps)))
+	log.Printf("[history] History API endpoints registered")
+
 	// WebSocket endpoint for real-time communication with mobile clients
 	// Auth via query param token or Authorization header
 	mux.HandleFunc("GET /ws", websocket.Handler(wsHub, cfg))
