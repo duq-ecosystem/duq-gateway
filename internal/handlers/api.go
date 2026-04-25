@@ -178,6 +178,32 @@ func UnifiedAPI(deps *APIDeps) http.HandlerFunc {
 			return
 		}
 
+		// Auto-populate user_id from auth context if not provided
+		// This allows authenticated clients (Android, web) to omit user_id
+		if req.UserID == "" {
+			// Context values may be int64 (from keycloak middleware) or string
+			if telegramID, ok := r.Context().Value("telegram_id").(int64); ok && telegramID != 0 {
+				req.UserID = fmt.Sprintf("%d", telegramID)
+				log.Printf("[api] Using telegram_id from context: %s", req.UserID)
+			} else if telegramIDStr, ok := r.Context().Value("telegram_id").(string); ok && telegramIDStr != "" {
+				req.UserID = telegramIDStr
+				log.Printf("[api] Using telegram_id (string) from context: %s", req.UserID)
+			} else if userID, ok := r.Context().Value("user_id").(int64); ok && userID != 0 {
+				req.UserID = fmt.Sprintf("%d", userID)
+				log.Printf("[api] Using user_id from context: %s", req.UserID)
+			} else if userIDStr, ok := r.Context().Value("user_id").(string); ok && userIDStr != "" {
+				req.UserID = userIDStr
+				log.Printf("[api] Using user_id (string) from context: %s", req.UserID)
+			}
+		}
+
+		// Set source to android if authenticated via Keycloak and source not set
+		if req.Source == "" {
+			if _, ok := r.Context().Value("keycloak_username").(string); ok {
+				req.Source = "android"
+			}
+		}
+
 		resp, err := ProcessMessage(r.Context(), deps, &req)
 
 		w.Header().Set("Content-Type", "application/json")
