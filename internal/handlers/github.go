@@ -127,8 +127,8 @@ func GitHub(deps *GitHubDeps) http.HandlerFunc {
 }
 
 func formatGitHubMessage(eventType string, webhook GitHubWebhook) string {
-	prefix := "[GitHub уведомление] "
-	suffix := "\n\nУведоми меня об этом в Telegram."
+	prefix := "[GitHub] "
+	suffix := ""
 
 	switch eventType {
 	case "pull_request":
