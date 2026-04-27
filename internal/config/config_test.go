@@ -25,8 +25,8 @@ func TestLoadDefaults(t *testing.T) {
 	if cfg.Port != "8082" {
 		t.Errorf("Port = %s, want 8082", cfg.Port)
 	}
-	if cfg.TelegramChatID != "764733417" {
-		t.Errorf("TelegramChatID = %s, want 764733417", cfg.TelegramChatID)
+	if cfg.TelegramChatID != "" {
+		t.Errorf("TelegramChatID = %s, want empty (set via env var)", cfg.TelegramChatID)
 	}
 	if cfg.DuqURL != "http://localhost:8081" {
 		t.Errorf("DuqURL = %s, want http://localhost:8081", cfg.DuqURL)

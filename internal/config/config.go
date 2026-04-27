@@ -126,7 +126,7 @@ type Config struct {
 func Load() (*Config, error) {
 	cfg := &Config{
 		Port:           "8082",
-		TelegramChatID: "764733417",
+		TelegramChatID: "", // Set via DUQ_TELEGRAM_CHAT_ID env var
 		DuqURL:      "http://localhost:8081",
 		GatewayHost:    "localhost:8082", // Phase 3: Default to localhost
 		UseAsyncQueue:  true,             // Phase 3: Default to async (new behavior)
